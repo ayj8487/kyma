@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fefcfb;
+  --foreground: #374151;
+
+  --sakura-50: #fff8f9;
+  --sakura-100: #ffe8ed;
+  --sakura-200: #ffcdd8;
+  --sakura-300: #ffadbf;
+  --sakura-400: #f88da6;
+  --sakura-500: #f06f90;
+  --sakura-600: #e0557a;
+  --sakura-700: #c24066;
+  --sakura-800: #a33455;
+  --sakura-900: #872b47;
+
+  --warm-50: #fffdfb;
+  --warm-100: #faf6f2;
+  --warm-200: #f2ebe3;
+  --warm-300: #e6d9ca;
+  --warm-400: #d4bfa6;
+  --warm-500: #b8a088;
+
+  --accent-gold: #d4a853;
+  --accent-indigo: #6b7280;
+}
+
+.dark {
+  --background: #111118;
+  --foreground: #eae8f0;
+
+  --sakura-50: #1c1218;
+  --sakura-100: #2e1824;
+  --sakura-200: #4c223a;
+  --sakura-300: #7a3458;
+  --sakura-400: #b84e78;
+  --sakura-500: #f06f90;
+  --sakura-600: #f8909e;
+  --sakura-700: #fbb0bc;
+  --sakura-800: #fdd5dc;
+  --sakura-900: #fef2f4;
+
+  --warm-50: #141418;
+  --warm-100: #1c1c24;
+  --warm-200: #282832;
+  --warm-300: #38384a;
+  --warm-400: #505068;
+  --warm-500: #727290;
+
+  --accent-gold: #e8bf6a;
+  --accent-indigo: #a0aec0;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-sakura-50: var(--sakura-50);
+  --color-sakura-100: var(--sakura-100);
+  --color-sakura-200: var(--sakura-200);
+  --color-sakura-300: var(--sakura-300);
+  --color-sakura-400: var(--sakura-400);
+  --color-sakura-500: var(--sakura-500);
+  --color-sakura-600: var(--sakura-600);
+  --color-sakura-700: var(--sakura-700);
+  --color-sakura-800: var(--sakura-800);
+  --color-sakura-900: var(--sakura-900);
+
+  --color-warm-50: var(--warm-50);
+  --color-warm-100: var(--warm-100);
+  --color-warm-200: var(--warm-200);
+  --color-warm-300: var(--warm-300);
+  --color-warm-400: var(--warm-400);
+  --color-warm-500: var(--warm-500);
+
+  --color-accent-gold: var(--accent-gold);
+  --color-accent-indigo: var(--accent-indigo);
+
+  --font-sans: var(--font-noto-sans-jp);
+}
+
+/* Force light mode regardless of system preference */
+html {
+  color-scheme: light;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), "Noto Sans JP", sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--warm-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--sakura-300);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sakura-400);
+}
+
+/* Selection color */
+::selection {
+  background: var(--sakura-200);
+  color: var(--sakura-900);
+}

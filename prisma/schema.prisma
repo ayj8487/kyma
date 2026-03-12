@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  passwordHash  String?
+  role          String   @default("user")
+  jlptLevel     String   @default("N5")
+  totalPoints   Int      @default(0)
+  streakCount   Int      @default(0)
+  lastStudyDate DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  progress     UserProgress[]
+  quizAttempts QuizAttempt[]
+  bookmarks    Bookmark[]
+}
+
+model KanaCharacter {
+  id          String @id @default(cuid())
+  character   String
+  romaji      String
+  type        String // hiragana, katakana
+  category    String // gojuon, dakuon, handakuon, yoon
+  row         String // a, ka, sa, ta, na, ha, ma, ya, ra, wa
+  orderIndex  Int
+  strokeCount Int    @default(1)
+}
+
+model Word {
+  id              String @id @default(cuid())
+  word            String
+  reading         String
+  meaning         String
+  jlptLevel       String // N5, N4, N3, N2, N1
+  partOfSpeech    String
+  exampleSentence String?
+  exampleReading  String?
+  exampleMeaning  String?
+  orderIndex      Int    @default(0)
+}
+
+model UserProgress {
+  id            String   @id @default(cuid())
+  userId        String
+  contentType   String   // kana, word, grammar
+  contentId     String
+  status        String   @default("new") // new, learning, mastered
+  correctCount  Int      @default(0)
+  incorrectCount Int     @default(0)
+  lastReviewedAt DateTime?
+  nextReviewAt   DateTime?
+  easeFactor    Float    @default(2.5)
+  interval      Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, contentType, contentId])
+}
+
+model QuizAttempt {
+  id             String   @id @default(cuid())
+  userId         String
+  quizType       String   // kana, word
+  questionData   String   // JSON string
+  selectedAnswer String
+  correctAnswer  String
+  isCorrect      Boolean
+  timeSpent      Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Bookmark {
+  id          String   @id @default(cuid())
+  userId      String
+  contentType String
+  contentId   String
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, contentType, contentId])
+}

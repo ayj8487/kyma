@@ -1,0 +1,48 @@
+import { Word } from "@/types";
+
+export const n5Words: Word[] = [
+  { id: "w-1", word: "私", reading: "わたし", meaning: "나, 저", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "私は学生です。", exampleReading: "わたしはがくせいです。", exampleMeaning: "저는 학생입니다." },
+  { id: "w-2", word: "人", reading: "ひと", meaning: "사람", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "あの人は誰ですか。", exampleReading: "あのひとはだれですか。", exampleMeaning: "저 사람은 누구입니까?" },
+  { id: "w-3", word: "日本", reading: "にほん", meaning: "일본", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "日本は美しいです。", exampleReading: "にほんはうつくしいです。", exampleMeaning: "일본은 아름답습니다." },
+  { id: "w-4", word: "学生", reading: "がくせい", meaning: "학생", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "彼は学生です。", exampleReading: "かれはがくせいです。", exampleMeaning: "그는 학생입니다." },
+  { id: "w-5", word: "先生", reading: "せんせい", meaning: "선생님", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "先生はやさしいです。", exampleReading: "せんせいはやさしいです。", exampleMeaning: "선생님은 친절합니다." },
+  { id: "w-6", word: "友達", reading: "ともだち", meaning: "친구", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "友達と遊びます。", exampleReading: "ともだちとあそびます。", exampleMeaning: "친구와 놉니다." },
+  { id: "w-7", word: "家", reading: "いえ", meaning: "집", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "家に帰ります。", exampleReading: "いえにかえります。", exampleMeaning: "집에 돌아갑니다." },
+  { id: "w-8", word: "学校", reading: "がっこう", meaning: "학교", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "学校に行きます。", exampleReading: "がっこうにいきます。", exampleMeaning: "학교에 갑니다." },
+  { id: "w-9", word: "会社", reading: "かいしゃ", meaning: "회사", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "会社で働きます。", exampleReading: "かいしゃではたらきます。", exampleMeaning: "회사에서 일합니다." },
+  { id: "w-10", word: "本", reading: "ほん", meaning: "책", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "本を読みます。", exampleReading: "ほんをよみます。", exampleMeaning: "책을 읽습니다." },
+  { id: "w-11", word: "水", reading: "みず", meaning: "물", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "水を飲みます。", exampleReading: "みずをのみます。", exampleMeaning: "물을 마십니다." },
+  { id: "w-12", word: "食べる", reading: "たべる", meaning: "먹다", jlptLevel: "N5", partOfSpeech: "동사", exampleSentence: "ご飯を食べます。", exampleReading: "ごはんをたべます。", exampleMeaning: "밥을 먹습니다." },
+  { id: "w-13", word: "飲む", reading: "のむ", meaning: "마시다", jlptLevel: "N5", partOfSpeech: "동사", exampleSentence: "お茶を飲みます。", exampleReading: "おちゃをのみます。", exampleMeaning: "차를 마십니다." },
+  { id: "w-14", word: "行く", reading: "いく", meaning: "가다", jlptLevel: "N5", partOfSpeech: "동사", exampleSentence: "駅に行きます。", exampleReading: "えきにいきます。", exampleMeaning: "역에 갑니다." },
+  { id: "w-15", word: "来る", reading: "くる", meaning: "오다", jlptLevel: "N5", partOfSpeech: "동사", exampleSentence: "友達が来ます。", exampleReading: "ともだちがきます。", exampleMeaning: "친구가 옵니다." },
+  { id: "w-16", word: "見る", reading: "みる", meaning: "보다", jlptLevel: "N5", partOfSpeech: "동사", exampleSentence: "テレビを見ます。", exampleReading: "テレビをみます。", exampleMeaning: "TV를 봅니다." },
+  { id: "w-17", word: "聞く", reading: "きく", meaning: "듣다, 묻다", jlptLevel: "N5", partOfSpeech: "동사", exampleSentence: "音楽を聞きます。", exampleReading: "おんがくをききます。", exampleMeaning: "음악을 듣습니다." },
+  { id: "w-18", word: "書く", reading: "かく", meaning: "쓰다", jlptLevel: "N5", partOfSpeech: "동사", exampleSentence: "手紙を書きます。", exampleReading: "てがみをかきます。", exampleMeaning: "편지를 씁니다." },
+  { id: "w-19", word: "読む", reading: "よむ", meaning: "읽다", jlptLevel: "N5", partOfSpeech: "동사", exampleSentence: "新聞を読みます。", exampleReading: "しんぶんをよみます。", exampleMeaning: "신문을 읽습니다." },
+  { id: "w-20", word: "話す", reading: "はなす", meaning: "말하다", jlptLevel: "N5", partOfSpeech: "동사", exampleSentence: "日本語を話します。", exampleReading: "にほんごをはなします。", exampleMeaning: "일본어를 말합니다." },
+  { id: "w-21", word: "買う", reading: "かう", meaning: "사다", jlptLevel: "N5", partOfSpeech: "동사", exampleSentence: "パンを買います。", exampleReading: "パンをかいます。", exampleMeaning: "빵을 삽니다." },
+  { id: "w-22", word: "大きい", reading: "おおきい", meaning: "크다", jlptLevel: "N5", partOfSpeech: "형용사", exampleSentence: "大きい犬です。", exampleReading: "おおきいいぬです。", exampleMeaning: "큰 개입니다." },
+  { id: "w-23", word: "小さい", reading: "ちいさい", meaning: "작다", jlptLevel: "N5", partOfSpeech: "형용사", exampleSentence: "小さい猫です。", exampleReading: "ちいさいねこです。", exampleMeaning: "작은 고양이입니다." },
+  { id: "w-24", word: "新しい", reading: "あたらしい", meaning: "새롭다", jlptLevel: "N5", partOfSpeech: "형용사", exampleSentence: "新しい車です。", exampleReading: "あたらしいくるまです。", exampleMeaning: "새 차입니다." },
+  { id: "w-25", word: "古い", reading: "ふるい", meaning: "오래되다, 낡다", jlptLevel: "N5", partOfSpeech: "형용사", exampleSentence: "古い本です。", exampleReading: "ふるいほんです。", exampleMeaning: "오래된 책입니다." },
+  { id: "w-26", word: "いい", reading: "いい", meaning: "좋다", jlptLevel: "N5", partOfSpeech: "형용사", exampleSentence: "天気がいいです。", exampleReading: "てんきがいいです。", exampleMeaning: "날씨가 좋습니다." },
+  { id: "w-27", word: "悪い", reading: "わるい", meaning: "나쁘다", jlptLevel: "N5", partOfSpeech: "형용사", exampleSentence: "天気が悪いです。", exampleReading: "てんきがわるいです。", exampleMeaning: "날씨가 나쁩니다." },
+  { id: "w-28", word: "高い", reading: "たかい", meaning: "높다, 비싸다", jlptLevel: "N5", partOfSpeech: "형용사", exampleSentence: "この山は高いです。", exampleReading: "このやまはたかいです。", exampleMeaning: "이 산은 높습니다." },
+  { id: "w-29", word: "安い", reading: "やすい", meaning: "싸다", jlptLevel: "N5", partOfSpeech: "형용사", exampleSentence: "このりんごは安いです。", exampleReading: "このりんごはやすいです。", exampleMeaning: "이 사과는 쌉니다." },
+  { id: "w-30", word: "今日", reading: "きょう", meaning: "오늘", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "今日は月曜日です。", exampleReading: "きょうはげつようびです。", exampleMeaning: "오늘은 월요일입니다." },
+  { id: "w-31", word: "明日", reading: "あした", meaning: "내일", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "明日学校に行きます。", exampleReading: "あしたがっこうにいきます。", exampleMeaning: "내일 학교에 갑니다." },
+  { id: "w-32", word: "昨日", reading: "きのう", meaning: "어제", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "昨日映画を見ました。", exampleReading: "きのうえいがをみました。", exampleMeaning: "어제 영화를 봤습니다." },
+  { id: "w-33", word: "朝", reading: "あさ", meaning: "아침", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "朝ご飯を食べます。", exampleReading: "あさごはんをたべます。", exampleMeaning: "아침밥을 먹습니다." },
+  { id: "w-34", word: "夜", reading: "よる", meaning: "밤", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "夜は静かです。", exampleReading: "よるはしずかです。", exampleMeaning: "밤은 조용합니다." },
+  { id: "w-35", word: "電車", reading: "でんしゃ", meaning: "전철", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "電車に乗ります。", exampleReading: "でんしゃにのります。", exampleMeaning: "전철을 탑니다." },
+  { id: "w-36", word: "駅", reading: "えき", meaning: "역", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "駅はどこですか。", exampleReading: "えきはどこですか。", exampleMeaning: "역은 어디입니까?" },
+  { id: "w-37", word: "病院", reading: "びょういん", meaning: "병원", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "病院に行きます。", exampleReading: "びょういんにいきます。", exampleMeaning: "병원에 갑니다." },
+  { id: "w-38", word: "お金", reading: "おかね", meaning: "돈", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "お金がありません。", exampleReading: "おかねがありません。", exampleMeaning: "돈이 없습니다." },
+  { id: "w-39", word: "時間", reading: "じかん", meaning: "시간", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "時間がありません。", exampleReading: "じかんがありません。", exampleMeaning: "시간이 없습니다." },
+  { id: "w-40", word: "天気", reading: "てんき", meaning: "날씨", jlptLevel: "N5", partOfSpeech: "명사", exampleSentence: "今日の天気はいいです。", exampleReading: "きょうのてんきはいいです。", exampleMeaning: "오늘 날씨가 좋습니다." },
+];
+
+export function getWordsByLevel(level: string): Word[] {
+  return n5Words.filter((w) => w.jlptLevel === level);
+}
