@@ -51,10 +51,12 @@ const topics = [
 
 function tryParseJSON(text: string): ParsedAIMessage | null {
   try {
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    // Remove markdown code block wrappers if present
+    let cleaned = text.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
     if (!jsonMatch) return null;
     const parsed = JSON.parse(jsonMatch[0]);
-    if (parsed.japanese && parsed.korean) return parsed;
+    if (parsed.japanese) return parsed;
     return null;
   } catch {
     return null;
@@ -366,7 +368,7 @@ export default function AIConversationPage() {
                 </span>
               </div>
 
-              {msg.role === "ai" && msg.parsed ? (
+              {msg.role === "ai" && msg.parsed && msg.parsed.japanese ? (
                 <>
                   <p className="text-base font-medium">
                     {msg.parsed.japanese}
@@ -376,9 +378,11 @@ export default function AIConversationPage() {
                       {msg.parsed.reading}
                     </p>
                   )}
-                  <p className="text-sm text-gray-500 mt-1">
-                    {msg.parsed.korean}
-                  </p>
+                  {msg.parsed.korean && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      {msg.parsed.korean}
+                    </p>
+                  )}
 
                   {/* Correction */}
                   {msg.parsed.correction && (
@@ -412,7 +416,7 @@ export default function AIConversationPage() {
                   </button>
                 </>
               ) : (
-                <p className="text-base">{msg.content}</p>
+                <p className="text-base whitespace-pre-wrap">{msg.content}</p>
               )}
             </div>
           </div>
