@@ -12,6 +12,8 @@ import {
   Loader2,
   AlertCircle,
   Sparkles,
+  Mic,
+  MicOff,
 } from "lucide-react";
 import { speakJapanese } from "@/lib/tts";
 
@@ -66,8 +68,46 @@ export default function AIConversationPage() {
   const [level, setLevel] = useState("beginner");
   const [topic, setTopic] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isListening, setIsListening] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    setSpeechSupported(!!SpeechRecognition);
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.lang = "ja-JP";
+      recognition.interimResults = true;
+      recognition.continuous = false;
+
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        const transcript = Array.from(event.results)
+          .map((result) => result[0].transcript)
+          .join("");
+        setInput(transcript);
+      };
+
+      recognition.onend = () => setIsListening(false);
+      recognition.onerror = () => setIsListening(false);
+
+      recognitionRef.current = recognition;
+    }
+  }, []);
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) return;
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      setInput("");
+      recognitionRef.current.start();
+      setIsListening(true);
+    }
+  };
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -421,11 +461,28 @@ export default function AIConversationPage() {
                 sendMessage();
               }
             }}
-            placeholder="일본어 또는 한국어로 메시지를 입력하세요..."
-            className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl resize-none focus:outline-none focus:border-indigo-400 text-sm"
+            placeholder={isListening ? "듣고 있습니다..." : "일본어 또는 한국어로 메시지를 입력하세요..."}
+            className={`flex-1 px-4 py-3 border-2 rounded-xl resize-none focus:outline-none text-sm ${
+              isListening
+                ? "border-red-400 bg-red-50 focus:border-red-400"
+                : "border-gray-200 focus:border-indigo-400"
+            }`}
             rows={1}
             disabled={isLoading}
           />
+          {speechSupported && (
+            <button
+              onClick={toggleListening}
+              disabled={isLoading}
+              className={`px-4 py-3 rounded-xl transition-colors ${
+                isListening
+                  ? "bg-red-500 text-white animate-pulse"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+            </button>
+          )}
           <button
             onClick={sendMessage}
             disabled={!input.trim() || isLoading}
@@ -435,7 +492,7 @@ export default function AIConversationPage() {
           </button>
         </div>
         <p className="text-xs text-gray-400 mt-2 text-center">
-          Enter로 전송 · Shift+Enter로 줄바꿈
+          {speechSupported ? "마이크로 음성 입력 · " : ""}Enter로 전송 · Shift+Enter로 줄바꿈
         </p>
       </div>
     </div>
