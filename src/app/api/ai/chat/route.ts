@@ -4,6 +4,10 @@ import { streamText } from "ai";
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
+  if (!process.env.OPENAI_API_KEY) {
+    return new Response("OpenAI API key is not configured", { status: 500 });
+  }
+
   const { messages, level = "beginner" } = await req.json();
 
   const levelGuide: Record<string, string> = {

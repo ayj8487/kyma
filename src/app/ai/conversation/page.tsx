@@ -215,18 +215,7 @@ export default function AIConversationPage() {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n");
-        for (const line of lines) {
-          if (line.startsWith("0:")) {
-            try {
-              const text = JSON.parse(line.slice(2));
-              fullText += text;
-            } catch {
-              // ignore parse errors
-            }
-          }
-        }
+        fullText += decoder.decode(value, { stream: true });
       }
 
       const parsed = tryParseJSON(fullText);
@@ -461,7 +450,7 @@ export default function AIConversationPage() {
                 sendMessage();
               }
             }}
-            placeholder={isListening ? "듣고 있습니다..." : "일본어 또는 한국어로 메시지를 입력하세요..."}
+            placeholder={isListening ? "듣고 있습니다..." : "메시지를 입력하세요..."}
             className={`flex-1 px-4 py-3 border-2 rounded-xl resize-none focus:outline-none text-sm ${
               isListening
                 ? "border-red-400 bg-red-50 focus:border-red-400"
