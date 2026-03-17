@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { hiraganaData, katakanaData } from "@/data/kana";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,8 +11,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "type parameter required (hiragana or katakana)" }, { status: 400 });
     }
 
-    let data = type === "hiragana" ? hiraganaData : katakanaData;
-    if (category) data = data.filter((k) => k.category === category);
+    const where: Record<string, string> = { type };
+    if (category) where.category = category;
+
+    const data = await prisma.kanaCharacter.findMany({
+      where,
+      orderBy: { orderIndex: "asc" },
+    });
 
     return NextResponse.json({ data, total: data.length });
   } catch {

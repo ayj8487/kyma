@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { n5Words } from "@/data/words";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,17 +10,30 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search");
     const pos = searchParams.get("pos");
 
-    let data = [...n5Words];
-    if (jlptLevel) data = data.filter((w) => w.jlptLevel === jlptLevel);
-    if (pos) data = data.filter((w) => w.partOfSpeech === pos);
-    if (search) data = data.filter((w) => w.word.includes(search) || w.reading.includes(search) || w.meaning.includes(search));
+    const where: Record<string, unknown> = {};
+    if (jlptLevel) where.jlptLevel = jlptLevel;
+    if (pos) where.partOfSpeech = pos;
+    if (search) {
+      where.OR = [
+        { word: { contains: search } },
+        { reading: { contains: search } },
+        { meaning: { contains: search } },
+      ];
+    }
 
-    const total = data.length;
+    const [data, total] = await Promise.all([
+      prisma.word.findMany({
+        where,
+        orderBy: { orderIndex: "asc" },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.word.count({ where }),
+    ]);
+
     const totalPages = Math.ceil(total / limit);
-    const start = (page - 1) * limit;
-    const paged = data.slice(start, start + limit);
 
-    return NextResponse.json({ data: paged, total, page, totalPages });
+    return NextResponse.json({ data, total, page, totalPages });
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
