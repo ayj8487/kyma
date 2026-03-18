@@ -47,6 +47,18 @@ const topics = [
   { id: "business", label: "비즈니스", emoji: "💼" },
   { id: "food", label: "음식", emoji: "🍣" },
   { id: "hobby", label: "취미", emoji: "🎮" },
+  { id: "shopping", label: "쇼핑", emoji: "🛍️" },
+  { id: "school", label: "학교", emoji: "🏫" },
+  { id: "hospital", label: "병원", emoji: "🏥" },
+  { id: "restaurant", label: "레스토랑 주문", emoji: "🍽️" },
+  { id: "weather", label: "날씨", emoji: "🌤️" },
+  { id: "sports", label: "스포츠", emoji: "⚽" },
+  { id: "movie", label: "영화/드라마", emoji: "🎬" },
+  { id: "family", label: "가족", emoji: "👨‍👩‍👧‍👦" },
+  { id: "hotel", label: "호텔 체크인", emoji: "🏨" },
+  { id: "station", label: "역/교통", emoji: "🚃" },
+  { id: "selfintro", label: "자기소개", emoji: "🙋" },
+  { id: "culture", label: "일본 문화", emoji: "⛩️" },
 ];
 
 function tryParseJSON(text: string): ParsedAIMessage | null {
@@ -122,13 +134,23 @@ export default function AIConversationPage() {
 
     const topicPrompts: Record<string, string> = {
       free: "自由に会話を始めてください。まず挨拶をして、相手のことを聞いてください。",
-      travel:
-        "旅行について会話を始めてください。日本旅行について聞いてください。",
+      travel: "旅行について会話を始めてください。日本旅行について聞いてください。",
       daily: "日常生活について会話を始めてください。今日何をしたか聞いてください。",
-      business:
-        "ビジネスの場面で会話を始めてください。仕事について聞いてください。",
+      business: "ビジネスの場面で会話を始めてください。仕事について聞いてください。",
       food: "食べ物について会話を始めてください。好きな日本料理について聞いてください。",
       hobby: "趣味について会話を始めてください。週末に何をするか聞いてください。",
+      shopping: "あなたは店員です。お客さんが来ました。「いらっしゃいませ」と言って、何をお探しか聞いてください。",
+      school: "学校生活について会話を始めてください。どんな授業が好きか聞いてください。",
+      hospital: "あなたは病院の受付です。患者さんが来ました。症状を聞いてください。",
+      restaurant: "あなたはレストランのウェイターです。お客さんが来ました。「いらっしゃいませ」と言って、注文を聞いてください。",
+      weather: "今日の天気について会話を始めてください。最近の天気がどうだったか聞いてください。",
+      sports: "スポーツについて会話を始めてください。好きなスポーツは何か聞いてください。",
+      movie: "映画やドラマについて会話を始めてください。最近見た映画について聞いてください。",
+      family: "家族について会話を始めてください。家族は何人いるか聞いてください。",
+      hotel: "あなたはホテルのフロントスタッフです。お客さんがチェックインに来ました。予約の確認をしてください。",
+      station: "あなたは駅の案内係です。道に迷った人が来ました。どこに行きたいか聞いてください。",
+      selfintro: "初めて会った場面です。まず自己紹介をして、相手の名前と出身を聞いてください。",
+      culture: "日本の文化について会話を始めてください。日本の祭りや伝統について聞いてください。",
     };
 
     setIsLoading(true);
@@ -278,7 +300,7 @@ export default function AIConversationPage() {
           <h2 className="text-sm font-semibold text-gray-500 mb-3">
             대화 주제
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
             {topics.map((t) => (
               <button
                 key={t.id}
