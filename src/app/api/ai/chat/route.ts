@@ -1,11 +1,15 @@
-import { openai } from "@ai-sdk/openai";
-import { streamText } from "ai";
+import { createGroq } from "@ai-sdk/groq";
+import { generateText } from "ai";
 
 export const maxDuration = 30;
 
+const groq = createGroq({
+  apiKey: process.env.GROQ_API_KEY,
+});
+
 export async function POST(req: Request) {
-  if (!process.env.OPENAI_API_KEY) {
-    return new Response("OpenAI API key is not configured", { status: 500 });
+  if (!process.env.GROQ_API_KEY) {
+    return new Response("Groq API key is not configured", { status: 500 });
   }
 
   const { messages, level = "beginner" } = await req.json();
@@ -29,20 +33,26 @@ export async function POST(req: Request) {
 - 会話を自然に続けてください。質問を混ぜて学生が話す機会を作ってください。
 
 ## 応答形式（厳守）
-\`\`\`json
 {
   "japanese": "日本語の返答",
   "reading": "ひらがなの読み方",
   "korean": "한국어 번역",
   "correction": null または { "wrong": "学生の間違い", "correct": "正しい表現", "explanation": "한국어로 된 설명" }
-}
-\`\`\``;
+}`;
 
-  const result = streamText({
-    model: openai("gpt-4o-mini"),
-    system: systemPrompt,
-    messages,
-  });
+  try {
+    const result = await generateText({
+      model: groq("llama-3.3-70b-versatile"),
+      system: systemPrompt,
+      messages,
+      maxRetries: 1,
+    });
 
-  return result.toTextStreamResponse();
+    return new Response(result.text, {
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
+  } catch (error) {
+    console.error("AI chat error:", error);
+    return new Response("AI 응답 생성에 실패했습니다", { status: 500 });
+  }
 }

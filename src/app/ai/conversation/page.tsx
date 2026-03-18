@@ -146,17 +146,7 @@ export default function AIConversationPage() {
         throw new Error("API 요청 실패");
       }
 
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("스트림을 읽을 수 없습니다");
-
-      let fullText = "";
-      const decoder = new TextDecoder();
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        fullText += decoder.decode(value, { stream: true });
-      }
+      const fullText = await response.text();
 
       const parsed = tryParseJSON(fullText);
       setMessages([
@@ -208,17 +198,7 @@ export default function AIConversationPage() {
         throw new Error("API 요청 실패");
       }
 
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("스트림을 읽을 수 없습니다");
-
-      let fullText = "";
-      const decoder = new TextDecoder();
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        fullText += decoder.decode(value, { stream: true });
-      }
+      const fullText = await response.text();
 
       const parsed = tryParseJSON(fullText);
       setMessages((prev) => [
