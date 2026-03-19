@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { MessageCircle, PenTool, Sparkles } from "lucide-react";
+import { BookOpen, PenTool, Sparkles } from "lucide-react";
 
 const features = [
-  { href: "/ai/conversation", icon: Sparkles, title: "AI 자유 대화", desc: "AI와 자유롭게 일본어로 대화하세요. 난이도별 맞춤 대화와 실시간 문법 교정을 받을 수 있습니다.", color: "pink", badge: "NEW" },
-  { href: "/ai/chat", icon: MessageCircle, title: "시나리오 회화", desc: "다양한 상황별 일본어 회화를 연습하세요. 자기소개, 레스토랑, 쇼핑 등 실용적인 시나리오가 준비되어 있습니다.", color: "indigo", badge: "5개 시나리오" },
+  { href: "/ai/conversation", icon: Sparkles, title: "AI 자유 대화", desc: "AI와 자유롭게 일본어로 대화하세요. 난이도별 맞춤 대화와 실시간 문법 교정을 받을 수 있습니다.", color: "pink", badge: "18개 시나리오" },
   { href: "/ai/correction", icon: PenTool, title: "문장 교정", desc: "작성한 일본어 문장의 문법 오류를 확인하고 올바른 표현을 배우세요. 조사, 활용, 문체 등을 점검합니다.", color: "violet", badge: "실시간 교정" },
+  { href: "/grammar", icon: BookOpen, title: "문법 학습", desc: "JLPT N5~N3 레벨별 문법을 체계적으로 학습하세요. 예문과 함께 핵심 문법 포인트를 익힐 수 있습니다.", color: "emerald", badge: "N5~N3" },
 ];
 
 export default function AIPage() {

@@ -18,6 +18,7 @@ const features = [
     description:
       "일본어의 기본 문자인 히라가나와 가타카나를 체계적으로 학습하세요.",
     color: "bg-pink-50 text-pink-500",
+    href: "/kana",
   },
   {
     icon: GraduationCap,
@@ -25,6 +26,7 @@ const features = [
     description:
       "JLPT 레벨별로 분류된 필수 일본어 단어를 플래시카드로 암기하세요.",
     color: "bg-violet-50 text-violet-500",
+    href: "/words",
   },
   {
     icon: FileQuestion,
@@ -32,6 +34,7 @@ const features = [
     description:
       "다양한 유형의 퀴즈와 SRS 복습으로 학습한 내용을 완벽히 익히세요.",
     color: "bg-amber-50 text-amber-500",
+    href: "/quiz",
   },
   {
     icon: BarChart3,
@@ -39,6 +42,7 @@ const features = [
     description:
       "학습 현황과 통계를 한눈에 확인하고 꾸준한 학습을 이어가세요.",
     color: "bg-emerald-50 text-emerald-500",
+    href: "/progress",
   },
   {
     icon: Bot,
@@ -46,6 +50,7 @@ const features = [
     description:
       "AI와 함께 실전 일본어 회화를 연습하고 문장을 교정받으세요.",
     color: "bg-blue-50 text-blue-500",
+    href: "/ai",
   },
   {
     icon: Keyboard,
@@ -53,6 +58,7 @@ const features = [
     description:
       "일본어 입력에 익숙해지도록 타이핑 게임으로 재미있게 연습하세요.",
     color: "bg-rose-50 text-rose-500",
+    href: "/typing",
   },
 ];
 
@@ -130,9 +136,10 @@ export default function Home() {
           </div>
 
           <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map(({ icon: Icon, title, description, color }) => (
-              <div
+            {features.map(({ icon: Icon, title, description, color, href }) => (
+              <Link
                 key={title}
+                href={href}
                 className="group rounded-2xl border border-gray-100 bg-white p-6 transition-all hover:border-pink-100 hover:shadow-lg hover:shadow-pink-50"
               >
                 <div className={`mb-4 inline-flex rounded-xl p-3 ${color}`}>
@@ -144,7 +151,7 @@ export default function Home() {
                 <p className="text-sm leading-relaxed text-gray-400">
                   {description}
                 </p>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

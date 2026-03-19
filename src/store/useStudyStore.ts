@@ -63,6 +63,9 @@ interface StudyStore {
   updateSRS: (contentType: string, contentId: string, quality: number) => void;
   getDueItems: () => ProgressEntry[];
   getWrongItems: () => ProgressEntry[];
+
+  // Reset
+  resetAllProgress: () => void;
 }
 
 const getToday = () => new Date().toISOString().split("T")[0];
@@ -258,6 +261,20 @@ export const useStudyStore = create<StudyStore>()(
         return Object.values(get().progress).filter(
           (p) => p.incorrectCount > p.correctCount
         );
+      },
+
+      resetAllProgress: () => {
+        set({
+          progress: {},
+          quizHistory: [],
+          streakCount: 0,
+          lastStudyDate: null,
+          totalPoints: 0,
+          todayStudyCount: 0,
+          todayDate: null,
+          bookmarks: [],
+          studyHistory: {},
+        });
       },
     }),
     { name: "kyma-study-store" }

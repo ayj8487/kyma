@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useStudyStore } from "@/store/useStudyStore";
 import { hiraganaData, katakanaData } from "@/data/kana";
@@ -21,9 +21,12 @@ import {
   Flame,
   Star,
   TrendingUp,
+  RotateCcw,
 } from "lucide-react";
 
 export default function ProgressPage() {
+  const [showResetModal, setShowResetModal] = useState(false);
+
   const progress = useStudyStore((s) => s.progress);
   const quizHistory = useStudyStore((s) => s.quizHistory);
   const streakCount = useStudyStore((s) => s.streakCount);
@@ -31,6 +34,7 @@ export default function ProgressPage() {
   const getCorrectRate = useStudyStore((s) => s.getCorrectRate);
   const getMasteredCount = useStudyStore((s) => s.getMasteredCount);
   const getLearningCount = useStudyStore((s) => s.getLearningCount);
+  const resetAllProgress = useStudyStore((s) => s.resetAllProgress);
 
   const correctRate = getCorrectRate();
   const hiraganaMastered = getMasteredCount("kana");
@@ -92,21 +96,30 @@ export default function ProgressPage() {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-zinc-950 dark:to-zinc-900">
       <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
         {/* Header */}
-        <div className="mb-8 flex items-center gap-3">
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 sm:text-3xl">
-              학습 현황
-            </h1>
-            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-              나의 학습 진도와 통계를 확인하세요
-            </p>
+        <div className="mb-8 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 sm:text-3xl">
+                학습 현황
+              </h1>
+              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                나의 학습 진도와 통계를 확인하세요
+              </p>
+            </div>
           </div>
+          <button
+            onClick={() => setShowResetModal(true)}
+            className="flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-500 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            초기화
+          </button>
         </div>
 
         {/* Stats cards */}
@@ -333,6 +346,40 @@ export default function ProgressPage() {
           )}
         </div>
       </div>
+
+      {/* Reset confirmation modal */}
+      {showResetModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-zinc-800">
+            <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+              학습 현황 초기화
+            </h3>
+            <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+              모든 학습 데이터가 삭제됩니다. 진행도, 퀴즈 기록, 포인트, 연속 학습일, 북마크가 모두 초기화됩니다.
+            </p>
+            <p className="mt-1 text-xs text-red-500">
+              이 작업은 되돌릴 수 없습니다.
+            </p>
+            <div className="mt-5 flex gap-3">
+              <button
+                onClick={() => setShowResetModal(false)}
+                className="flex-1 rounded-lg border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-700"
+              >
+                취소
+              </button>
+              <button
+                onClick={() => {
+                  resetAllProgress();
+                  setShowResetModal(false);
+                }}
+                className="flex-1 rounded-lg bg-red-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-600"
+              >
+                초기화
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
