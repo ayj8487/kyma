@@ -49,7 +49,6 @@ const moreLinks: NavItem[] = [
   { href: "/goals", label: "목표", icon: Target },
   { href: "/bookmarks", label: "북마크", icon: Bookmark },
   { href: "/camera", label: "카메라", icon: Camera },
-  { href: "/admin", label: "관리자", icon: Settings },
 ];
 
 export function Navbar() {

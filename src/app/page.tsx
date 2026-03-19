@@ -84,16 +84,17 @@ export default function Home() {
             </div>
 
             {/* Title */}
-            <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-tight text-gray-800 sm:text-5xl lg:text-6xl">
+            <h1 className="max-w-3xl text-2xl font-bold leading-tight tracking-tight text-gray-800 sm:text-3xl lg:text-5xl">
               일본어,{" "}
               <span className="bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
                 쉽고 재미있게
-              </span>{" "}
-              배우자
+              </span>
+              <br className="sm:hidden" />
+              {" "}배우자
             </h1>
 
             {/* Subtitle */}
-            <p className="mt-6 max-w-xl text-base leading-relaxed text-gray-500 sm:text-lg">
+            <p className="mt-6 max-w-xl text-sm leading-relaxed text-gray-500 sm:text-base">
               히라가나부터 단어, 문법까지 — 체계적인 커리큘럼과 다양한 퀴즈로
               일본어를 즐겁게 마스터하세요.
             </p>
@@ -116,7 +117,7 @@ export default function Home() {
             </div>
 
             {/* Decorative Japanese text */}
-            <div className="mt-20 select-none text-7xl font-extralight tracking-[0.3em] text-pink-100 sm:text-8xl lg:text-9xl">
+            <div className="mt-20 select-none text-5xl font-extralight tracking-[0.3em] text-pink-100 sm:text-7xl lg:text-9xl">
               きょうま
             </div>
           </div>
@@ -187,7 +188,7 @@ export default function Home() {
               </span>
             </div>
             <p className="text-sm text-gray-400">
-              &copy; {new Date().getFullYear()} Kyma. All rights reserved.
+              &copy; {new Date().getFullYear()} Kyma. AnYoungJun. All rights reserved.
             </p>
           </div>
         </div>

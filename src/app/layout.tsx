@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Noto_Sans_JP } from "next/font/google";
+import { Noto_Sans_JP, Jua } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 
@@ -7,6 +7,13 @@ const notoSansJP = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
   subsets: ["latin"],
   weight: ["300", "400", "500", "700", "900"],
+  display: "swap",
+});
+
+const jua = Jua({
+  variable: "--font-jua",
+  subsets: ["latin"],
+  weight: "400",
   display: "swap",
 });
 
@@ -23,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" suppressHydrationWarning>
-      <body className={`${notoSansJP.variable} font-sans antialiased`}>
+      <body className={`${notoSansJP.variable} ${jua.variable} font-sans antialiased`}>
         <Navbar />
         <main>{children}</main>
       </body>
