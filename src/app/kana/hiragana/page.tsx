@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { hiraganaData, kanaRows } from "@/data/kana";
 import { speakJapanese } from "@/lib/tts";
@@ -50,8 +50,32 @@ export default function HiraganaPage() {
     [filteredData]
   );
 
-  const handleCharClick = (char: KanaCharacter) => {
-    setSelectedChar(char);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isLongPress = useRef(false);
+
+  const handlePointerDown = (char: KanaCharacter) => {
+    isLongPress.current = false;
+    longPressTimer.current = setTimeout(() => {
+      isLongPress.current = true;
+      setSelectedChar(char);
+    }, 500);
+  };
+
+  const handlePointerUp = (char: KanaCharacter) => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    if (!isLongPress.current) {
+      speakJapanese(char.character);
+    }
+  };
+
+  const handlePointerLeave = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
   };
 
   const handleSpeak = (text: string, e?: React.MouseEvent) => {
@@ -77,7 +101,7 @@ export default function HiraganaPage() {
             히라가나
           </h1>
           <p className="mt-2 text-gray-600 dark:text-gray-400">
-            히라가나 문자표 - 문자를 클릭하면 상세 정보를 확인할 수 있습니다
+            히라가나 문자표 - 클릭하면 발음, 길게 누르면 상세 정보
           </p>
         </div>
 
@@ -143,7 +167,10 @@ export default function HiraganaPage() {
                 return (
                   <button
                     key={char.id}
-                    onClick={() => handleCharClick(char)}
+                    onPointerDown={() => handlePointerDown(char)}
+                    onPointerUp={() => handlePointerUp(char)}
+                    onPointerLeave={handlePointerLeave}
+                    onContextMenu={(e) => e.preventDefault()}
                     className="group flex flex-col items-center justify-center rounded-xl border border-gray-200 bg-white px-2 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100 active:translate-y-0 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-blue-600 dark:hover:shadow-blue-900/20"
                   >
                     <span className="text-2xl font-medium text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 sm:text-3xl">

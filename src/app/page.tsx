@@ -84,7 +84,7 @@ export default function Home() {
             </div>
 
             {/* Title */}
-            <h1 className="max-w-3xl text-2xl font-bold leading-tight tracking-tight text-gray-800 sm:text-3xl lg:text-5xl">
+            <h1 className="max-w-3xl text-3xl font-bold leading-tight tracking-tight text-gray-800 sm:text-4xl lg:text-5xl">
               일본어,{" "}
               <span className="bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
                 쉽고 재미있게
@@ -117,7 +117,7 @@ export default function Home() {
             </div>
 
             {/* Decorative Japanese text */}
-            <div className="mt-20 select-none text-5xl font-extralight tracking-[0.3em] text-pink-100 sm:text-7xl lg:text-9xl">
+            <div className="mt-20 select-none text-6xl font-extralight tracking-[0.3em] text-pink-100 sm:text-8xl lg:text-9xl">
               きょうま
             </div>
           </div>
