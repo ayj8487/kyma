@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, Timer, Target, Zap, RotateCcw, Keyboard } from "lucide-react";
+import { ArrowLeft, Timer, Target, Zap, RotateCcw, Keyboard, SkipForward, Eye } from "lucide-react";
 import { hiraganaData, katakanaData } from "@/data/kana";
 import { n5Words } from "@/data/words";
 
@@ -21,6 +21,7 @@ export default function TypingPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
+  const [showAnswer, setShowAnswer] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const startGame = useCallback((m: Mode) => {
@@ -77,6 +78,7 @@ export default function TypingPage() {
       });
       setFeedback("correct");
       setInput("");
+      setShowAnswer(false);
       setCurrentIndex((i) => (i + 1) % items.length);
       setTimeout(() => setFeedback(null), 300);
     } else if (value.length >= answer.length) {
@@ -86,6 +88,23 @@ export default function TypingPage() {
       setInput("");
       setTimeout(() => setFeedback(null), 500);
     }
+  };
+
+  const skipCurrent = () => {
+    if (!items[currentIndex]) return;
+    setMistakes((m) => m + 1);
+    setStreak(0);
+    setFeedback("wrong");
+    setInput("");
+    setShowAnswer(false);
+    setCurrentIndex((i) => (i + 1) % items.length);
+    setTimeout(() => setFeedback(null), 300);
+    inputRef.current?.focus();
+  };
+
+  const toggleShowAnswer = () => {
+    setShowAnswer((prev) => !prev);
+    inputRef.current?.focus();
   };
 
   const accuracy = score + mistakes > 0 ? Math.round((score / (score + mistakes)) * 100) : 0;
@@ -165,16 +184,41 @@ export default function TypingPage() {
         </div>
       </div>
 
-      <div className="bg-white border-2 rounded-2xl p-12 text-center mb-6 shadow-sm">
-        <div className={`text-7xl font-bold mb-4 transition-colors ${feedback === "correct" ? "text-green-500" : feedback === "wrong" ? "text-red-500" : "text-gray-800"}`}>
+      <div className="bg-white dark:bg-gray-900 border-2 dark:border-gray-700 rounded-2xl p-8 sm:p-12 text-center mb-6 shadow-sm">
+        <div className={`text-6xl sm:text-7xl font-bold mb-4 transition-colors ${feedback === "correct" ? "text-green-500" : feedback === "wrong" ? "text-red-500" : "text-gray-800 dark:text-gray-100"}`}>
           {current?.display}
         </div>
+        {showAnswer && (
+          <div className="mb-3 px-4 py-2 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-xl inline-block">
+            <span className="text-yellow-700 dark:text-yellow-300 font-bold text-lg">{current?.answer}</span>
+          </div>
+        )}
         {mode !== "word" && (
           <p className="text-gray-400 text-sm">로마지를 입력하세요</p>
         )}
         {mode === "word" && (
           <p className="text-gray-400 text-sm">히라가나(읽기)를 입력하세요</p>
         )}
+      </div>
+
+      {/* Skip & Show Answer Buttons */}
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={toggleShowAnswer}
+          className={`flex-1 py-2.5 rounded-xl flex items-center justify-center gap-2 text-sm transition-colors ${
+            showAnswer
+              ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-700"
+              : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+          }`}
+        >
+          <Eye size={16} /> {showAnswer ? "정답 숨기기" : "정답 보기"}
+        </button>
+        <button
+          onClick={skipCurrent}
+          className="flex-1 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-700"
+        >
+          <SkipForward size={16} /> 건너뛰기
+        </button>
       </div>
 
       <div className="relative">

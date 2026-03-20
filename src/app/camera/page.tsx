@@ -100,6 +100,16 @@ export default function CameraPage() {
     } catch { /* ignore */ }
   }, []);
 
+  // Cleanup camera on unmount
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+      }
+    };
+  }, []);
+
   const saveHistory = (item: HistoryItem) => {
     setHistory((prev) => {
       const next = [item, ...prev.filter((h) => h.text !== item.text)].slice(0, 20);
@@ -116,23 +126,64 @@ export default function CameraPage() {
   const startCamera = async () => {
     try {
       setCameraError("");
-      const constraints: MediaStreamConstraints = {
-        video: {
-          facingMode: "environment",
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-        },
-      };
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      // Stop any existing stream first
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+      }
+
+      // Try rear camera first, fallback to any camera
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        });
+      } catch {
+        // Fallback: any available camera
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false,
+        });
+      }
+
       streamRef.current = stream;
-      if (videoRef.current) videoRef.current.srcObject = stream;
+
+      if (videoRef.current) {
+        const video = videoRef.current;
+        video.srcObject = stream;
+        // Critical for mobile: explicit play after metadata loads
+        video.onloadedmetadata = () => {
+          video.play().catch(() => {
+            // Autoplay blocked — user interaction already happened via button click
+          });
+        };
+        // Fallback: also try playing directly
+        try {
+          await video.play();
+        } catch {
+          // Will be handled by onloadedmetadata
+        }
+      }
+
       setCameraActive(true);
       setCapturedImage(null);
       setOcrText("");
       setResults([]);
       setZoom(1);
-    } catch {
-      setCameraError("카메라 접근이 거부되었습니다. 브라우저 설정에서 카메라 권한을 허용해주세요.");
+    } catch (err) {
+      console.error("Camera error:", err);
+      if (err instanceof DOMException && err.name === "NotAllowedError") {
+        setCameraError("카메라 권한이 거부되었습니다. 브라우저 설정에서 카메라 권한을 허용해주세요.");
+      } else if (err instanceof DOMException && err.name === "NotFoundError") {
+        setCameraError("사용 가능한 카메라를 찾을 수 없습니다.");
+      } else {
+        setCameraError("카메라를 시작할 수 없습니다. 다른 앱에서 카메라를 사용 중인지 확인해주세요.");
+      }
     }
   };
 
@@ -477,19 +528,22 @@ export default function CameraPage() {
                 <ImageIcon size={18} /> 갤러리
               </button>
             </div>
-            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+            <input ref={fileInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileUpload} className="hidden" />
             {cameraError && <p className="text-red-500 text-sm mt-3">{cameraError}</p>}
             <p className="text-xs text-gray-400 mt-3">💡 선명한 일본어 텍스트가 포함된 이미지에서 가장 잘 인식됩니다</p>
           </div>
         ) : (
           <div>
             <div className="relative rounded-xl overflow-hidden bg-black mb-4">
+              {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
               <video
                 ref={videoRef}
                 autoPlay
                 playsInline
-                className="w-full transition-transform duration-200"
-                style={{ transform: `scale(${zoom})` }}
+                muted
+                webkit-playsinline="true"
+                className="w-full transition-transform duration-200 min-h-[200px]"
+                style={{ transform: `scale(${zoom})`, objectFit: "cover" }}
               />
               <div className="absolute top-3 left-3 bg-black/50 text-white px-3 py-1 rounded-full text-xs flex items-center gap-1">
                 <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" /> 촬영 중
