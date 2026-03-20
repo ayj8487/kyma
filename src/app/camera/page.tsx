@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { Camera, CameraOff, Aperture, RotateCcw, Search, Volume2, ImageIcon } from "lucide-react";
+import { Camera, CameraOff, Aperture, RotateCcw, Search, Volume2, ImageIcon, Loader2 } from "lucide-react";
 import { n5Words } from "@/data/words";
 import { speakJapanese } from "@/lib/tts";
 
@@ -12,6 +12,8 @@ export default function CameraPage() {
   const [results, setResults] = useState<{ word: string; reading: string; meaning: string }[]>([]);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [extracting, setExtracting] = useState(false);
+  const [ocrText, setOcrText] = useState("");
+  const [ocrProgress, setOcrProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -25,6 +27,8 @@ export default function CameraPage() {
       if (videoRef.current) videoRef.current.srcObject = stream;
       setCameraActive(true);
       setCapturedImage(null);
+      setOcrText("");
+      setResults([]);
     } catch {
       setCameraError("카메라 접근이 거부되었습니다. 브라우저 설정에서 카메라 권한을 허용해주세요.");
     }
@@ -34,6 +38,51 @@ export default function CameraPage() {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
     setCameraActive(false);
+  };
+
+  const searchWords = (text: string) => {
+    const q = text.trim();
+    if (!q) return;
+    const found = n5Words.filter((w) =>
+      w.word.includes(q) || w.reading.includes(q) || w.meaning.includes(q) ||
+      q.includes(w.word) || q.includes(w.reading)
+    ).map((w) => ({ word: w.word, reading: w.reading, meaning: w.meaning }));
+    setResults(found.length > 0 ? found : [{ word: q, reading: "-", meaning: "학습 데이터에서 일치하는 단어를 찾을 수 없습니다." }]);
+  };
+
+  const processImage = async (imageData: string) => {
+    setExtracting(true);
+    setOcrProgress(0);
+    setOcrText("");
+    setResults([]);
+
+    try {
+      const Tesseract = await import("tesseract.js");
+      const worker = await Tesseract.createWorker("jpn", undefined, {
+        logger: (m: { status: string; progress: number }) => {
+          if (m.status === "recognizing text") {
+            setOcrProgress(Math.round(m.progress * 100));
+          }
+        },
+      });
+
+      const { data: { text } } = await worker.recognize(imageData);
+      await worker.terminate();
+
+      const cleaned = text.trim();
+      setOcrText(cleaned);
+
+      if (cleaned) {
+        searchWords(cleaned);
+      } else {
+        setResults([{ word: "—", reading: "-", meaning: "텍스트를 인식하지 못했습니다. 더 선명한 이미지로 다시 시도해보세요." }]);
+      }
+    } catch (err) {
+      console.error("OCR error:", err);
+      setResults([{ word: "⚠️", reading: "-", meaning: "텍스트 인식 중 오류가 발생했습니다. 다시 시도해주세요." }]);
+    } finally {
+      setExtracting(false);
+    }
   };
 
   const capturePhoto = useCallback(() => {
@@ -48,7 +97,7 @@ export default function CameraPage() {
     const dataUrl = canvas.toDataURL("image/png");
     setCapturedImage(dataUrl);
     stopCamera();
-    processImage();
+    processImage(dataUrl);
   }, []);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,37 +105,23 @@ export default function CameraPage() {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
-      setCapturedImage(ev.target?.result as string);
-      processImage();
+      const dataUrl = ev.target?.result as string;
+      setCapturedImage(dataUrl);
+      processImage(dataUrl);
     };
     reader.readAsDataURL(file);
-  };
-
-  const processImage = () => {
-    setExtracting(true);
-    // Simulated OCR - in production, connect to a real OCR API (Google Vision, Tesseract.js, etc.)
-    setTimeout(() => {
-      setExtracting(false);
-      setResults([{
-        word: "📷",
-        reading: "-",
-        meaning: "촬영된 이미지에서 텍스트를 인식했습니다. 현재는 데모 모드입니다. 아래 텍스트 입력으로 직접 검색해보세요!"
-      }]);
-    }, 1500);
   };
 
   const resetCapture = () => {
     setCapturedImage(null);
     setResults([]);
+    setOcrText("");
+    setOcrProgress(0);
   };
 
   const handleSearch = () => {
     if (!inputText.trim()) return;
-    const q = inputText.trim();
-    const found = n5Words.filter((w) =>
-      w.word.includes(q) || w.reading.includes(q) || w.meaning.includes(q)
-    ).map((w) => ({ word: w.word, reading: w.reading, meaning: w.meaning }));
-    setResults(found.length > 0 ? found : [{ word: q, reading: "-", meaning: "단어를 찾을 수 없습니다. 학습 데이터에 포함된 단어를 검색해보세요." }]);
+    searchWords(inputText.trim());
   };
 
   return (
@@ -103,14 +138,26 @@ export default function CameraPage() {
             <div className="relative rounded-xl overflow-hidden mb-4">
               <img src={capturedImage} alt="촬영된 이미지" className="w-full rounded-xl" />
               {extracting && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                   <div className="text-white text-center">
-                    <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                    <p className="text-sm">텍스트 인식 중...</p>
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
+                    <p className="text-sm font-medium">일본어 텍스트 인식 중...</p>
+                    <p className="text-xs text-gray-300 mt-1">{ocrProgress}%</p>
+                    <div className="w-40 h-1.5 bg-gray-600 rounded-full mt-2 mx-auto">
+                      <div className="h-full bg-indigo-500 rounded-full transition-all" style={{ width: `${ocrProgress}%` }} />
+                    </div>
                   </div>
                 </div>
               )}
             </div>
+
+            {ocrText && (
+              <div className="bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 rounded-xl p-4 mb-4">
+                <p className="text-xs text-indigo-500 dark:text-indigo-400 mb-1 font-medium">인식된 텍스트</p>
+                <p className="text-lg font-bold text-gray-900 dark:text-white break-words">{ocrText}</p>
+              </div>
+            )}
+
             <button onClick={resetCapture} className="w-full py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl flex items-center justify-center gap-2">
               <RotateCcw size={16} /> 다시 촬영
             </button>
@@ -131,6 +178,7 @@ export default function CameraPage() {
             </div>
             <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
             {cameraError && <p className="text-red-500 text-sm mt-3">{cameraError}</p>}
+            <p className="text-xs text-gray-400 mt-3">💡 선명한 일본어 텍스트가 포함된 이미지에서 가장 잘 인식됩니다</p>
           </div>
         ) : (
           <div>
@@ -148,7 +196,7 @@ export default function CameraPage() {
                 <CameraOff size={16} /> 중지
               </button>
             </div>
-            <p className="text-xs text-gray-400 text-center mt-3">💡 촬영 버튼을 눌러 텍스트를 캡처하세요</p>
+            <p className="text-xs text-gray-400 text-center mt-3">💡 일본어 텍스트에 카메라를 맞추고 촬영 버튼을 누르세요</p>
           </div>
         )}
       </div>
