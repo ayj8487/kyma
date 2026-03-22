@@ -355,7 +355,7 @@ export default function ProgressPage() {
               학습 현황 초기화
             </h3>
             <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-              모든 학습 데이터가 삭제됩니다. 진행도, 퀴즈 기록, 포인트, 연속 학습일, 북마크가 모두 초기화됩니다.
+              모든 학습 데이터가 삭제됩니다. 진행도, 퀴즈 기록, 포인트, 연속 학습일, 단어장이 모두 초기화됩니다.
             </p>
             <p className="mt-1 text-xs text-red-500">
               이 작업은 되돌릴 수 없습니다.

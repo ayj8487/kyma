@@ -47,7 +47,7 @@ const navLinks: NavItem[] = [
 const moreLinks: NavItem[] = [
   { href: "/progress", label: "진행도", icon: BarChart3 },
   { href: "/goals", label: "목표", icon: Target },
-  { href: "/bookmarks", label: "북마크", icon: Bookmark },
+  { href: "/bookmarks", label: "단어장", icon: Bookmark },
   { href: "/camera", label: "카메라", icon: Camera },
 ];
 
