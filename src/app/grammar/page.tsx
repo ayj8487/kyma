@@ -5,7 +5,7 @@ const levels = [
   { level: "N5", count: 30, desc: "기초 문법", detail: "です/ます, 조사, 기본 문형", available: true },
   { level: "N4", count: 20, desc: "초중급 문법", detail: "조건, 추측, 가능, 수동", available: true },
   { level: "N3", count: 25, desc: "중급 문법", detail: "복합 표현, 경어 기초", available: true },
-  { level: "N2", count: 0, desc: "중상급 문법", detail: "서면어, 문어체 표현", available: false },
+  { level: "N2", count: 20, desc: "중상급 문법", detail: "서면어, 문어체 표현", available: true },
   { level: "N1", count: 0, desc: "상급 문법", detail: "고급 문어, 관용 표현", available: false },
 ];
 

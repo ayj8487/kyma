@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Languages, BookOpen } from "lucide-react";
+import { Languages, BookOpen, BookText } from "lucide-react";
 
 const quizTypes = [
   {
@@ -19,9 +19,9 @@ const quizTypes = [
   {
     type: "word",
     title: "단어 퀴즈",
-    description: "JLPT N5 단어의 의미를 얼마나 잘 알고 있는지 테스트하세요",
-    detail: "일본어 단어를 보고 올바른 한국어 뜻을 고르는 퀴즈",
-    difficulty: "초급",
+    description: "JLPT 단어의 의미를 얼마나 잘 알고 있는지 테스트하세요",
+    detail: "일본어 단어를 보고 올바른 한국어 뜻을 고르는 퀴즈 (N5~N2)",
+    difficulty: "초급~중급",
     difficultyColor:
       "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
     icon: BookOpen,
@@ -29,6 +29,20 @@ const quizTypes = [
     iconColor: "text-indigo-600 dark:text-indigo-400",
     borderColor:
       "border-indigo-200 hover:border-indigo-400 dark:border-indigo-800 dark:hover:border-indigo-600",
+  },
+  {
+    type: "grammar",
+    title: "문법 퀴즈",
+    description: "JLPT 문법 패턴의 의미를 테스트하세요",
+    detail: "일본어 문법 패턴을 보고 올바른 한국어 뜻을 고르는 퀴즈 (N5~N2)",
+    difficulty: "초급~중급",
+    difficultyColor:
+      "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
+    icon: BookText,
+    iconBg: "bg-purple-100 dark:bg-purple-900/40",
+    iconColor: "text-purple-600 dark:text-purple-400",
+    borderColor:
+      "border-purple-200 hover:border-purple-400 dark:border-purple-800 dark:hover:border-purple-600",
   },
 ];
 
@@ -45,7 +59,7 @@ export default function QuizPage() {
           </p>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {quizTypes.map((quiz) => {
             const Icon = quiz.icon;
             return (

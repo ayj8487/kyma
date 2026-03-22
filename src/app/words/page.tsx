@@ -25,10 +25,10 @@ const levels = [
   },
   {
     level: "N2",
-    words: 1000,
+    words: 40,
     description: "중상급 단계",
     detail: "일상적인 장면에서 사용되는 일본어의 이해에 더해, 폭넓은 장면의 일본어를 이해",
-    available: false,
+    available: true,
   },
   {
     level: "N1",

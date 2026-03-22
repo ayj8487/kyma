@@ -2,13 +2,9 @@
 
 import { useState, useCallback } from "react";
 import Link from "next/link";
-import { n5Words } from "@/data/words";
-import { n4Words } from "@/data/words-n4";
-import { n3Words } from "@/data/words-n3";
-import { n2Words } from "@/data/words-n2";
+import { grammarPoints, GrammarPoint } from "@/data/grammar";
 import { speakJapanese } from "@/lib/tts";
 import { useStudyStore } from "@/store/useStudyStore";
-import { Word } from "@/types";
 import {
   ArrowLeft,
   ArrowRight,
@@ -20,12 +16,7 @@ import {
   Shuffle,
 } from "lucide-react";
 
-const wordsByLevel: Record<string, Word[]> = {
-  N5: n5Words,
-  N4: n4Words,
-  N3: n3Words,
-  N2: n2Words,
-};
+const levels = ["N5", "N4", "N3", "N2"];
 
 function shuffleArray<T>(arr: T[]): T[] {
   const shuffled = [...arr];
@@ -36,9 +27,9 @@ function shuffleArray<T>(arr: T[]): T[] {
   return shuffled;
 }
 
-export default function FlashcardPage() {
+export default function GrammarFlashcardPage() {
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
-  const [words, setWords] = useState<Word[]>([]);
+  const [cards, setCards] = useState<GrammarPoint[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [knownCards, setKnownCards] = useState<Set<string>>(new Set());
@@ -49,7 +40,7 @@ export default function FlashcardPage() {
 
   const startFlashcard = useCallback((level: string) => {
     setSelectedLevel(level);
-    setWords(wordsByLevel[level] || n5Words);
+    setCards(grammarPoints.filter((g) => g.jlptLevel === level));
     setCurrentIndex(0);
     setIsFlipped(false);
     setKnownCards(new Set());
@@ -57,8 +48,8 @@ export default function FlashcardPage() {
     setIsShuffled(false);
   }, []);
 
-  const currentWord = words[currentIndex];
-  const totalCards = words.length;
+  const currentCard = cards[currentIndex];
+  const totalCards = cards.length;
 
   const flipCard = useCallback(() => {
     setIsFlipped((prev) => !prev);
@@ -79,32 +70,32 @@ export default function FlashcardPage() {
   }, [currentIndex]);
 
   const markKnown = useCallback(() => {
-    if (!currentWord) return;
-    setKnownCards((prev) => new Set(prev).add(currentWord.id));
+    if (!currentCard) return;
+    setKnownCards((prev) => new Set(prev).add(currentCard.id));
     setUnknownCards((prev) => {
       const next = new Set(prev);
-      next.delete(currentWord.id);
+      next.delete(currentCard.id);
       return next;
     });
-    updateProgress("word", currentWord.id, true);
+    updateProgress("grammar", currentCard.id, true);
     goToNext();
-  }, [currentWord, updateProgress, goToNext]);
+  }, [currentCard, updateProgress, goToNext]);
 
   const markUnknown = useCallback(() => {
-    if (!currentWord) return;
-    setUnknownCards((prev) => new Set(prev).add(currentWord.id));
+    if (!currentCard) return;
+    setUnknownCards((prev) => new Set(prev).add(currentCard.id));
     setKnownCards((prev) => {
       const next = new Set(prev);
-      next.delete(currentWord.id);
+      next.delete(currentCard.id);
       return next;
     });
-    updateProgress("word", currentWord.id, false);
+    updateProgress("grammar", currentCard.id, false);
     goToNext();
-  }, [currentWord, updateProgress, goToNext]);
+  }, [currentCard, updateProgress, goToNext]);
 
   const resetCards = useCallback(() => {
     if (selectedLevel) {
-      setWords(wordsByLevel[selectedLevel] || n5Words);
+      setCards(grammarPoints.filter((g) => g.jlptLevel === selectedLevel));
     }
     setCurrentIndex(0);
     setIsFlipped(false);
@@ -115,11 +106,8 @@ export default function FlashcardPage() {
 
   const toggleShuffle = useCallback(() => {
     if (!selectedLevel) return;
-    if (isShuffled) {
-      setWords(wordsByLevel[selectedLevel] || n5Words);
-    } else {
-      setWords(shuffleArray(wordsByLevel[selectedLevel] || n5Words));
-    }
+    const base = grammarPoints.filter((g) => g.jlptLevel === selectedLevel);
+    setCards(isShuffled ? base : shuffleArray(base));
     setCurrentIndex(0);
     setIsFlipped(false);
     setIsShuffled(!isShuffled);
@@ -131,16 +119,16 @@ export default function FlashcardPage() {
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-zinc-950 dark:to-zinc-900">
         <div className="mx-auto max-w-lg px-4 py-12 sm:px-6">
           <Link
-            href="/words"
+            href="/grammar"
             className="mb-8 flex items-center gap-1.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
           >
             <ArrowLeft className="h-4 w-4" />
-            단어 목록
+            문법 목록
           </Link>
 
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-              단어 플래시카드
+              문법 플래시카드
             </h1>
             <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
               레벨을 선택하세요
@@ -148,27 +136,31 @@ export default function FlashcardPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            {Object.entries(wordsByLevel).map(([level, w]) => (
-              <button
-                key={level}
-                onClick={() => startFlashcard(level)}
-                className="rounded-2xl border-2 border-zinc-200 bg-white p-6 text-center transition-all hover:border-indigo-400 hover:shadow-lg dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-indigo-600"
-              >
-                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-                  {level}
-                </p>
-                <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                  {w.length}개 단어
-                </p>
-              </button>
-            ))}
+            {levels.map((level) => {
+              const count = grammarPoints.filter((g) => g.jlptLevel === level).length;
+              return (
+                <button
+                  key={level}
+                  onClick={() => startFlashcard(level)}
+                  disabled={count === 0}
+                  className="rounded-2xl border-2 border-zinc-200 bg-white p-6 text-center transition-all hover:border-purple-400 hover:shadow-lg disabled:opacity-40 disabled:cursor-not-allowed dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-purple-600"
+                >
+                  <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                    {level}
+                  </p>
+                  <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                    {count}개 문법
+                  </p>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
     );
   }
 
-  if (!currentWord) return null;
+  if (!currentCard) return null;
 
   const progressPercent = Math.round(
     ((knownCards.size + unknownCards.size) / totalCards) * 100
@@ -184,12 +176,12 @@ export default function FlashcardPage() {
             className="flex items-center gap-1.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
           >
             <ArrowLeft className="h-4 w-4" />
-            {selectedLevel} 단어
+            {selectedLevel} 문법
           </button>
           <div className="flex items-center gap-2">
             <button
               onClick={toggleShuffle}
-              className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isShuffled ? "text-indigo-600 dark:text-indigo-400" : "text-zinc-600 dark:text-zinc-400"} hover:text-zinc-900 dark:hover:text-zinc-100`}
+              className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isShuffled ? "text-purple-600 dark:text-purple-400" : "text-zinc-600 dark:text-zinc-400"} hover:text-zinc-900 dark:hover:text-zinc-100`}
             >
               <Shuffle className="h-4 w-4" />
             </button>
@@ -211,7 +203,7 @@ export default function FlashcardPage() {
         </div>
         <div className="mb-6 h-2 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
           <div
-            className="h-full rounded-full bg-indigo-500 transition-all duration-300"
+            className="h-full rounded-full bg-purple-500 transition-all duration-300"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
@@ -242,48 +234,62 @@ export default function FlashcardPage() {
                 transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
               }}
             >
-              {/* Front */}
+              {/* Front - Pattern */}
               <div
                 className="flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg dark:border-zinc-700 dark:bg-zinc-800 sm:min-h-[380px]"
                 style={{ backfaceVisibility: "hidden" }}
               >
-                <span className="text-6xl font-bold text-zinc-900 dark:text-zinc-50 sm:text-7xl">
-                  {currentWord.word}
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  {currentCard.tags.map((tag) => (
+                    <span key={tag} className="rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <span className="text-4xl font-bold text-zinc-900 dark:text-zinc-50 sm:text-5xl text-center">
+                  {currentCard.pattern}
                 </span>
                 <p className="mt-6 text-sm text-zinc-400 dark:text-zinc-500">
                   카드를 탭하여 뒤집기
                 </p>
               </div>
 
-              {/* Back */}
+              {/* Back - Meaning & Examples */}
               <div
-                className="absolute inset-0 flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-indigo-200 bg-indigo-50 p-8 shadow-lg dark:border-indigo-800 dark:bg-indigo-950/50 sm:min-h-[380px]"
+                className="absolute inset-0 flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-purple-200 bg-purple-50 p-6 shadow-lg dark:border-purple-800 dark:bg-purple-950/50 sm:min-h-[380px] overflow-y-auto"
                 style={{
                   backfaceVisibility: "hidden",
                   transform: "rotateY(180deg)",
                 }}
               >
-                <span className="text-4xl font-bold text-zinc-900 dark:text-zinc-50 sm:text-5xl">
-                  {currentWord.word}
+                <span className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 sm:text-3xl text-center">
+                  {currentCard.pattern}
                 </span>
-                <span className="mt-3 text-xl text-indigo-600 dark:text-indigo-400">
-                  {currentWord.reading}
+                <span className="mt-2 text-lg text-purple-600 dark:text-purple-400 text-center">
+                  {currentCard.meaning}
                 </span>
-                <span className="mt-2 text-lg text-zinc-700 dark:text-zinc-300">
-                  {currentWord.meaning}
-                </span>
+                <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300 text-center">
+                  {currentCard.explanation}
+                </p>
+                <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400 text-center">
+                  {currentCard.formation}
+                </p>
 
-                {currentWord.exampleSentence && (
-                  <div className="mt-6 w-full rounded-xl bg-white/60 p-4 dark:bg-zinc-800/60">
-                    <p className="text-center text-sm font-medium text-zinc-800 dark:text-zinc-200">
-                      {currentWord.exampleSentence}
-                    </p>
-                    <p className="mt-1 text-center text-xs text-indigo-500 dark:text-indigo-400">
-                      {currentWord.exampleReading}
-                    </p>
-                    <p className="mt-1 text-center text-xs text-zinc-500 dark:text-zinc-400">
-                      {currentWord.exampleMeaning}
-                    </p>
+                {currentCard.examples.length > 0 && (
+                  <div className="mt-4 w-full space-y-2">
+                    {currentCard.examples.slice(0, 2).map((ex, i) => (
+                      <div key={i} className="rounded-xl bg-white/60 p-3 dark:bg-zinc-800/60">
+                        <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+                          {ex.japanese}
+                        </p>
+                        <p className="mt-0.5 text-xs text-purple-500 dark:text-purple-400">
+                          {ex.reading}
+                        </p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                          {ex.korean}
+                        </p>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -298,12 +304,14 @@ export default function FlashcardPage() {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                speakJapanese(currentWord.word);
+                if (currentCard.examples[0]) {
+                  speakJapanese(currentCard.examples[0].japanese);
+                }
               }}
               className="flex items-center gap-2 rounded-full bg-zinc-100 px-5 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
             >
               <Volume2 className="h-4 w-4" />
-              발음 듣기
+              예문 듣기
             </button>
           </div>
 
@@ -336,7 +344,7 @@ export default function FlashcardPage() {
               이전
             </button>
             <Link
-              href="/words"
+              href="/grammar"
               className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
             >
               <Home className="h-4 w-4" />

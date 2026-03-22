@@ -28,6 +28,13 @@ export default function GrammarLevelPage({ params }: { params: Promise<{ level: 
           <h1 className="text-3xl font-bold">JLPT {level} 문법</h1>
           <p className="text-gray-500 mt-1">총 {grammarList.length}개 문법 포인트</p>
         </div>
+        <Link
+          href="/grammar/flashcard"
+          className="flex items-center gap-2 rounded-xl bg-purple-100 px-4 py-2.5 text-sm font-medium text-purple-700 hover:bg-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:hover:bg-purple-900/60"
+        >
+          <BookOpen size={16} />
+          플래시카드
+        </Link>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-6">

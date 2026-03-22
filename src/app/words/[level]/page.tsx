@@ -5,6 +5,7 @@ import Link from "next/link";
 import { n5Words } from "@/data/words";
 import { n4Words } from "@/data/words-n4";
 import { n3Words } from "@/data/words-n3";
+import { n2Words } from "@/data/words-n2";
 import { speakJapanese } from "@/lib/tts";
 import { Word } from "@/types";
 import {
@@ -38,6 +39,7 @@ export default function WordListPage({
     N5: n5Words,
     N4: n4Words,
     N3: n3Words,
+    N2: n2Words,
   };
   const words = wordsByLevel[level.toUpperCase()] || n5Words;
 

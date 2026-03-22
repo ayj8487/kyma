@@ -2,8 +2,12 @@
 
 import { use, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { hiraganaData } from "@/data/kana";
+import { hiraganaData, katakanaData } from "@/data/kana";
 import { n5Words } from "@/data/words";
+import { n4Words } from "@/data/words-n4";
+import { n3Words } from "@/data/words-n3";
+import { n2Words } from "@/data/words-n2";
+import { grammarPoints } from "@/data/grammar";
 import { useStudyStore } from "@/store/useStudyStore";
 import {
   ArrowLeft,
@@ -18,11 +22,19 @@ import {
 interface Question {
   id: string;
   question: string;
+  questionSub?: string;
   options: string[];
   correctAnswer: string;
-  contentType: "kana" | "word";
+  contentType: "kana" | "word" | "grammar";
   contentId: string;
 }
+
+const wordsByLevel: Record<string, typeof n5Words> = {
+  N5: n5Words,
+  N4: n4Words,
+  N3: n3Words,
+  N2: n2Words,
+};
 
 function shuffleArray<T>(arr: T[]): T[] {
   const shuffled = [...arr];
@@ -34,10 +46,11 @@ function shuffleArray<T>(arr: T[]): T[] {
 }
 
 function generateKanaQuestions(): Question[] {
-  const kana = shuffleArray(hiraganaData).slice(0, 10);
+  const allKana = [...hiraganaData, ...katakanaData];
+  const kana = shuffleArray(allKana).slice(0, 10);
   return kana.map((k, idx) => {
     const wrongOptions = shuffleArray(
-      hiraganaData.filter((h) => h.romaji !== k.romaji)
+      allKana.filter((h) => h.romaji !== k.romaji)
     )
       .slice(0, 3)
       .map((h) => h.romaji);
@@ -53,11 +66,12 @@ function generateKanaQuestions(): Question[] {
   });
 }
 
-function generateWordQuestions(): Question[] {
-  const words = shuffleArray(n5Words).slice(0, 10);
+function generateWordQuestions(level: string): Question[] {
+  const pool = wordsByLevel[level] || n5Words;
+  const words = shuffleArray(pool).slice(0, 10);
   return words.map((w, idx) => {
     const wrongOptions = shuffleArray(
-      n5Words.filter((other) => other.meaning !== w.meaning)
+      pool.filter((other) => other.meaning !== w.meaning)
     )
       .slice(0, 3)
       .map((other) => other.meaning);
@@ -65,6 +79,7 @@ function generateWordQuestions(): Question[] {
     return {
       id: `word-q-${idx}`,
       question: w.word,
+      questionSub: w.reading,
       options,
       correctAnswer: w.meaning,
       contentType: "word" as const,
@@ -73,6 +88,31 @@ function generateWordQuestions(): Question[] {
   });
 }
 
+function generateGrammarQuestions(level: string): Question[] {
+  const pool = grammarPoints.filter((g) => g.jlptLevel === level);
+  if (pool.length < 4) return [];
+  const selected = shuffleArray(pool).slice(0, Math.min(10, pool.length));
+  return selected.map((g, idx) => {
+    const wrongOptions = shuffleArray(
+      pool.filter((other) => other.meaning !== g.meaning)
+    )
+      .slice(0, 3)
+      .map((other) => other.meaning);
+    const options = shuffleArray([g.meaning, ...wrongOptions]);
+    return {
+      id: `grammar-q-${idx}`,
+      question: g.pattern,
+      questionSub: g.examples[0]?.japanese,
+      options,
+      correctAnswer: g.meaning,
+      contentType: "grammar" as const,
+      contentId: g.id,
+    };
+  });
+}
+
+const levelOptions = ["N5", "N4", "N3", "N2"];
+
 export default function QuizTypePage({
   params,
 }: {
@@ -80,6 +120,9 @@ export default function QuizTypePage({
 }) {
   const { type } = use(params);
 
+  const [selectedLevel, setSelectedLevel] = useState<string | null>(
+    type === "kana" ? "ALL" : null
+  );
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -89,27 +132,51 @@ export default function QuizTypePage({
     { question: string; selected: string; correct: string }[]
   >([]);
   const [isFinished, setIsFinished] = useState(false);
-  const [startTime] = useState(() => Date.now());
+  const [startTime, setStartTime] = useState(() => Date.now());
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   const updateProgress = useStudyStore((s) => s.updateProgress);
   const addQuizRecord = useStudyStore((s) => s.addQuizRecord);
 
-  // Generate questions on mount
+  const startQuiz = useCallback(
+    (level: string) => {
+      setSelectedLevel(level);
+      let qs: Question[] = [];
+      if (type === "kana") {
+        qs = generateKanaQuestions();
+      } else if (type === "word") {
+        qs = generateWordQuestions(level);
+      } else if (type === "grammar") {
+        qs = generateGrammarQuestions(level);
+      }
+      setQuestions(qs);
+      setCurrentIdx(0);
+      setSelectedAnswer(null);
+      setIsAnswered(false);
+      setCorrectCount(0);
+      setWrongAnswers([]);
+      setIsFinished(false);
+      setStartTime(Date.now());
+      setElapsedSeconds(0);
+    },
+    [type]
+  );
+
+  // Auto-start for kana
   useEffect(() => {
-    const qs =
-      type === "kana" ? generateKanaQuestions() : generateWordQuestions();
-    setQuestions(qs);
-  }, [type]);
+    if (type === "kana") {
+      startQuiz("ALL");
+    }
+  }, [type, startQuiz]);
 
   // Timer
   useEffect(() => {
-    if (isFinished) return;
+    if (isFinished || !selectedLevel || questions.length === 0) return;
     const interval = setInterval(() => {
       setElapsedSeconds(Math.floor((Date.now() - startTime) / 1000));
     }, 1000);
     return () => clearInterval(interval);
-  }, [isFinished, startTime]);
+  }, [isFinished, startTime, selectedLevel, questions.length]);
 
   const currentQuestion = questions[currentIdx];
   const totalQuestions = questions.length;
@@ -145,12 +212,18 @@ export default function QuizTypePage({
 
   const finishQuiz = useCallback(() => {
     setIsFinished(true);
+    const typeLabel =
+      type === "kana"
+        ? "가나"
+        : type === "word"
+          ? `단어(${selectedLevel})`
+          : `문법(${selectedLevel})`;
     addQuizRecord({
-      type: type === "kana" ? "가나" : "단어",
+      type: typeLabel,
       totalQuestions,
       correctAnswers: correctCount,
     });
-  }, [addQuizRecord, type, totalQuestions, correctCount]);
+  }, [addQuizRecord, type, selectedLevel, totalQuestions, correctCount]);
 
   const handleNextOrFinish = useCallback(() => {
     if (currentIdx >= totalQuestions - 1) {
@@ -163,22 +236,149 @@ export default function QuizTypePage({
   }, [currentIdx, totalQuestions, finishQuiz]);
 
   const restartQuiz = useCallback(() => {
-    const qs =
-      type === "kana" ? generateKanaQuestions() : generateWordQuestions();
-    setQuestions(qs);
-    setCurrentIdx(0);
-    setSelectedAnswer(null);
-    setIsAnswered(false);
-    setCorrectCount(0);
-    setWrongAnswers([]);
-    setIsFinished(false);
-  }, [type]);
+    if (selectedLevel) startQuiz(selectedLevel);
+  }, [selectedLevel, startQuiz]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
+
+  const quizTitle =
+    type === "kana"
+      ? "가나 퀴즈"
+      : type === "word"
+        ? "단어 퀴즈"
+        : "문법 퀴즈";
+
+  const questionLabel =
+    type === "kana"
+      ? "이 문자의 로마지는?"
+      : type === "word"
+        ? "이 단어의 뜻은?"
+        : "이 문법의 뜻은?";
+
+  // Level selection screen for word/grammar
+  if (!selectedLevel || (type !== "kana" && questions.length === 0 && !isFinished)) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-zinc-950 dark:to-zinc-900">
+        <div className="mx-auto max-w-lg px-4 py-12 sm:px-6">
+          <Link
+            href="/quiz"
+            className="mb-8 flex items-center gap-1.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            퀴즈 목록
+          </Link>
+
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+              {quizTitle}
+            </h1>
+            <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+              레벨을 선택하세요
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {levelOptions.map((level) => {
+              const wordCount =
+                type === "word"
+                  ? (wordsByLevel[level]?.length || 0)
+                  : grammarPoints.filter((g) => g.jlptLevel === level).length;
+              return (
+                <button
+                  key={level}
+                  onClick={() => startQuiz(level)}
+                  disabled={wordCount < 4}
+                  className="rounded-2xl border-2 border-zinc-200 bg-white p-6 text-center transition-all hover:border-indigo-400 hover:shadow-lg disabled:opacity-40 disabled:cursor-not-allowed dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-indigo-600"
+                >
+                  <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                    {level}
+                  </p>
+                  <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                    {wordCount}개 {type === "word" ? "단어" : "문법"}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Mixed quiz option */}
+          <button
+            onClick={() => {
+              if (type === "word") {
+                const allWords = [...n5Words, ...n4Words, ...n3Words, ...n2Words];
+                const words = shuffleArray(allWords).slice(0, 10);
+                const qs = words.map((w, idx) => {
+                  const wrongOptions = shuffleArray(
+                    allWords.filter((other) => other.meaning !== w.meaning)
+                  )
+                    .slice(0, 3)
+                    .map((other) => other.meaning);
+                  return {
+                    id: `word-q-${idx}`,
+                    question: w.word,
+                    questionSub: w.reading,
+                    options: shuffleArray([w.meaning, ...wrongOptions]),
+                    correctAnswer: w.meaning,
+                    contentType: "word" as const,
+                    contentId: w.id,
+                  };
+                });
+                setSelectedLevel("혼합");
+                setQuestions(qs);
+                setCurrentIdx(0);
+                setSelectedAnswer(null);
+                setIsAnswered(false);
+                setCorrectCount(0);
+                setWrongAnswers([]);
+                setIsFinished(false);
+                setStartTime(Date.now());
+              } else {
+                const allGrammar = grammarPoints;
+                const selected = shuffleArray(allGrammar).slice(0, 10);
+                const qs = selected.map((g, idx) => {
+                  const wrongOptions = shuffleArray(
+                    allGrammar.filter((other) => other.meaning !== g.meaning)
+                  )
+                    .slice(0, 3)
+                    .map((other) => other.meaning);
+                  return {
+                    id: `grammar-q-${idx}`,
+                    question: g.pattern,
+                    questionSub: g.examples[0]?.japanese,
+                    options: shuffleArray([g.meaning, ...wrongOptions]),
+                    correctAnswer: g.meaning,
+                    contentType: "grammar" as const,
+                    contentId: g.id,
+                  };
+                });
+                setSelectedLevel("혼합");
+                setQuestions(qs);
+                setCurrentIdx(0);
+                setSelectedAnswer(null);
+                setIsAnswered(false);
+                setCorrectCount(0);
+                setWrongAnswers([]);
+                setIsFinished(false);
+                setStartTime(Date.now());
+              }
+            }}
+            className="mt-4 w-full rounded-2xl border-2 border-indigo-200 bg-indigo-50 p-4 text-center transition-all hover:border-indigo-400 hover:shadow-lg dark:border-indigo-800 dark:bg-indigo-950/30 dark:hover:border-indigo-600"
+          >
+            <p className="text-lg font-bold text-indigo-700 dark:text-indigo-300">
+              혼합 퀴즈
+            </p>
+            <p className="text-xs text-indigo-500 dark:text-indigo-400">
+              모든 레벨에서 랜덤 출제
+            </p>
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (questions.length === 0) {
     return (
@@ -210,6 +410,9 @@ export default function QuizTypePage({
             <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
               퀴즈 완료!
             </h1>
+            <p className="mt-1 text-sm text-zinc-400">
+              {quizTitle} {selectedLevel !== "ALL" && selectedLevel !== "혼합" ? `(${selectedLevel})` : selectedLevel === "혼합" ? "(혼합)" : ""}
+            </p>
             <p className="mt-2 text-zinc-500 dark:text-zinc-400">
               {emoji === "excellent"
                 ? "훌륭합니다!"
@@ -323,7 +526,7 @@ export default function QuizTypePage({
         {/* Progress */}
         <div className="mb-2 flex items-center justify-between text-sm text-zinc-600 dark:text-zinc-400">
           <span>
-            {type === "kana" ? "가나 퀴즈" : "단어 퀴즈"}
+            {quizTitle} {selectedLevel !== "ALL" && `(${selectedLevel})`}
           </span>
           <span>
             {currentIdx + 1} / {totalQuestions}
@@ -353,19 +556,22 @@ export default function QuizTypePage({
         {/* Question */}
         <div className="mb-8 flex flex-col items-center">
           <p className="mb-3 text-sm text-zinc-500 dark:text-zinc-400">
-            {type === "kana"
-              ? "이 문자의 로마지는?"
-              : "이 단어의 뜻은?"}
+            {questionLabel}
           </p>
-          <div className="flex min-h-[140px] w-full items-center justify-center rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
-            <span className="text-5xl font-bold text-zinc-900 dark:text-zinc-50 sm:text-6xl">
+          <div className="flex min-h-[140px] w-full flex-col items-center justify-center rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-800 px-4">
+            <span className={`font-bold text-zinc-900 dark:text-zinc-50 ${type === "grammar" ? "text-3xl sm:text-4xl" : "text-5xl sm:text-6xl"}`}>
               {currentQuestion.question}
             </span>
+            {currentQuestion.questionSub && (
+              <p className="mt-2 text-sm text-indigo-500 dark:text-indigo-400 text-center">
+                {currentQuestion.questionSub}
+              </p>
+            )}
           </div>
         </div>
 
         {/* Options */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className={`grid gap-3 ${type === "grammar" ? "grid-cols-1" : "grid-cols-2"}`}>
           {currentQuestion.options.map((option, idx) => {
             let optionStyle =
               "border-zinc-200 bg-white text-zinc-900 hover:border-indigo-300 hover:bg-indigo-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:border-indigo-600 dark:hover:bg-indigo-950/30";
@@ -393,14 +599,14 @@ export default function QuizTypePage({
                 disabled={isAnswered}
                 className={`flex items-center justify-center rounded-xl border-2 px-4 py-4 text-sm font-medium transition-all sm:text-base ${optionStyle}`}
               >
-                {option}
+                <span className="line-clamp-2">{option}</span>
                 {isAnswered && option === currentQuestion.correctAnswer && (
-                  <CheckCircle2 className="ml-2 h-4 w-4 text-emerald-500" />
+                  <CheckCircle2 className="ml-2 h-4 w-4 shrink-0 text-emerald-500" />
                 )}
                 {isAnswered &&
                   option === selectedAnswer &&
                   option !== currentQuestion.correctAnswer && (
-                    <XCircle className="ml-2 h-4 w-4 text-red-500" />
+                    <XCircle className="ml-2 h-4 w-4 shrink-0 text-red-500" />
                   )}
               </button>
             );
