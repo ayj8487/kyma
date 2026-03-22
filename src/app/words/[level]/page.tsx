@@ -8,6 +8,7 @@ import { n3Words } from "@/data/words-n3";
 import { n2Words } from "@/data/words-n2";
 import { speakJapanese } from "@/lib/tts";
 import { Word } from "@/types";
+import { useStudyStore } from "@/store/useStudyStore";
 import {
   ArrowLeft,
   Volume2,
@@ -15,6 +16,7 @@ import {
   ChevronDown,
   ChevronUp,
   Layers,
+  Bookmark,
 } from "lucide-react";
 
 const partOfSpeechFilters = ["전체", "명사", "동사", "형용사"] as const;
@@ -34,6 +36,8 @@ export default function WordListPage({
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<string>("전체");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const { toggleBookmark, isBookmarked } = useStudyStore();
 
   const wordsByLevel: Record<string, Word[]> = {
     N5: n5Words,
@@ -155,6 +159,16 @@ export default function WordListPage({
                   >
                     {word.partOfSpeech}
                   </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleBookmark("word", word.id);
+                    }}
+                    className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
+                    aria-label="단어장에 저장"
+                  >
+                    <Bookmark className={`h-4 w-4 ${isBookmarked("word", word.id) ? "text-yellow-500 fill-yellow-500" : "text-zinc-300 dark:text-zinc-600"}`} />
+                  </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();

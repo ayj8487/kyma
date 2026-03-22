@@ -5,7 +5,8 @@ import Link from "next/link";
 import { hiraganaData, kanaRows } from "@/data/kana";
 import { speakJapanese } from "@/lib/tts";
 import { KanaCharacter } from "@/types";
-import { ArrowLeft, Volume2, X } from "lucide-react";
+import { ArrowLeft, Volume2, X, Bookmark } from "lucide-react";
+import { useStudyStore } from "@/store/useStudyStore";
 
 type CategoryTab = "gojuon" | "dakuon" | "handakuon";
 
@@ -29,6 +30,7 @@ const handakuonRows = [
 export default function HiraganaPage() {
   const [activeTab, setActiveTab] = useState<CategoryTab>("gojuon");
   const [selectedChar, setSelectedChar] = useState<KanaCharacter | null>(null);
+  const { toggleBookmark, isBookmarked } = useStudyStore();
 
   const filteredData = hiraganaData.filter((k) => k.category === activeTab);
 
@@ -243,14 +245,27 @@ export default function HiraganaPage() {
                 </div>
               </div>
 
-              {/* TTS Button */}
-              <button
-                onClick={() => handleSpeak(selectedChar.character)}
-                className="flex w-full items-center justify-center gap-3 rounded-xl bg-blue-600 px-6 py-3.5 font-semibold text-white transition-colors hover:bg-blue-700 active:bg-blue-800"
-              >
-                <Volume2 className="h-5 w-5" />
-                발음 듣기
-              </button>
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => handleSpeak(selectedChar.character)}
+                  className="flex flex-1 items-center justify-center gap-3 rounded-xl bg-blue-600 px-6 py-3.5 font-semibold text-white transition-colors hover:bg-blue-700 active:bg-blue-800"
+                >
+                  <Volume2 className="h-5 w-5" />
+                  발음 듣기
+                </button>
+                <button
+                  onClick={() => toggleBookmark("kana", selectedChar.id)}
+                  className={`flex items-center justify-center rounded-xl px-4 py-3.5 font-semibold transition-colors ${
+                    isBookmarked("kana", selectedChar.id)
+                      ? "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/40 dark:text-yellow-400"
+                      : "bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
+                  }`}
+                  aria-label="단어장에 저장"
+                >
+                  <Bookmark className={`h-5 w-5 ${isBookmarked("kana", selectedChar.id) ? "fill-yellow-500" : ""}`} />
+                </button>
+              </div>
             </div>
           </div>
         )}

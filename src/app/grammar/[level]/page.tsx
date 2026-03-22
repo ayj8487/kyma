@@ -2,14 +2,16 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ChevronDown, ChevronUp, Volume2, BookOpen } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, Volume2, BookOpen, Bookmark } from "lucide-react";
 import { speakJapanese } from "@/lib/tts";
 import { grammarPoints } from "@/data/grammar";
+import { useStudyStore } from "@/store/useStudyStore";
 
 export default function GrammarLevelPage({ params }: { params: Promise<{ level: string }> }) {
   const { level } = use(params);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selectedTag, setSelectedTag] = useState<string>("전체");
+  const { toggleBookmark, isBookmarked } = useStudyStore();
 
   const grammarList = grammarPoints.filter((g) => g.jlptLevel === level);
 
@@ -77,6 +79,13 @@ export default function GrammarLevelPage({ params }: { params: Promise<{ level: 
                       {t}
                     </span>
                   ))}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); toggleBookmark("grammar", g.id); }}
+                    className="p-1.5 rounded-full hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-colors"
+                    aria-label="단어장에 저장"
+                  >
+                    <Bookmark size={16} className={isBookmarked("grammar", g.id) ? "text-yellow-500 fill-yellow-500" : "text-gray-300 dark:text-zinc-600"} />
+                  </button>
                   {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </div>
               </button>
