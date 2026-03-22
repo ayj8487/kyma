@@ -19,11 +19,20 @@ export default function AnimePage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const { toggleBookmark, isBookmarked } = useStudyStore();
 
-  const animeList = useMemo(() => Array.from(new Set(animeQuotes.map((q) => q.anime))), []);
+  const animeList = useMemo(() => {
+    const counts = animeQuotes.reduce<Record<string, number>>((acc, q) => {
+      acc[q.anime] = (acc[q.anime] || 0) + 1;
+      return acc;
+    }, {});
+    return Object.entries(counts)
+      .sort(([a], [b]) => a.localeCompare(b, "ko"))
+      .map(([name, count]) => ({ name, count }));
+  }, []);
 
   const filtered = animeQuotes.filter((q) => {
     if (diffFilter !== "all" && q.difficulty !== diffFilter) return false;
     if (animeFilter !== "all" && q.anime !== animeFilter) return false;
+
     return true;
   });
 
@@ -49,7 +58,7 @@ export default function AnimePage() {
       <div className="flex flex-wrap gap-1 mb-6">
         <button onClick={() => setAnimeFilter("all")} className={`px-2 py-1 rounded text-xs ${animeFilter === "all" ? "bg-purple-100 text-purple-700 font-medium" : "bg-gray-50 text-gray-500"}`}>전체 작품</button>
         {animeList.map((a) => (
-          <button key={a} onClick={() => setAnimeFilter(a)} className={`px-2 py-1 rounded text-xs ${animeFilter === a ? "bg-purple-100 text-purple-700 font-medium" : "bg-gray-50 text-gray-500"}`}>{a}</button>
+          <button key={a.name} onClick={() => setAnimeFilter(a.name)} className={`px-2 py-1 rounded text-xs ${animeFilter === a.name ? "bg-purple-100 text-purple-700 font-medium" : "bg-gray-50 text-gray-500"}`}>{a.name} ({a.count})</button>
         ))}
       </div>
 

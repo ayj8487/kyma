@@ -10,6 +10,8 @@ import {
   TrendingUp,
   Zap,
   ArrowRight,
+  Bookmark,
+  Sparkles,
 } from "lucide-react";
 import { useStudyStore } from "@/store/useStudyStore";
 
@@ -41,6 +43,20 @@ const quickAccessCards = [
     description: "실력 테스트",
     icon: FileQuestion,
     color: "from-emerald-500 to-teal-400",
+  },
+  {
+    href: "/bookmarks",
+    label: "단어장",
+    description: "저장한 학습 항목",
+    icon: Bookmark,
+    color: "from-yellow-500 to-amber-400",
+  },
+  {
+    href: "/ai/conversation",
+    label: "AI 자유대화",
+    description: "AI와 일본어 회화",
+    icon: Sparkles,
+    color: "from-pink-500 to-fuchsia-400",
   },
 ];
 
