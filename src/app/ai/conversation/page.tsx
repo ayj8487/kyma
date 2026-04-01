@@ -263,17 +263,17 @@ export default function AIConversationPage() {
         >
           <ArrowLeft size={14} /> AI 학습
         </Link>
-        <h1 className="text-3xl font-bold mb-2">
+        <h1 className="text-3xl font-bold mb-2 dark:text-zinc-50">
           <Sparkles className="inline text-indigo-500 mr-2" size={28} />
           AI 자유 대화
         </h1>
-        <p className="text-gray-600 mb-8">
+        <p className="text-gray-600 dark:text-zinc-400 mb-8">
           AI와 자유롭게 일본어로 대화하세요. 실시간으로 교정도 받을 수 있습니다.
         </p>
 
         {/* Level selection */}
         <div className="mb-8">
-          <h2 className="text-sm font-semibold text-gray-500 mb-3">
+          <h2 className="text-sm font-semibold text-gray-500 dark:text-zinc-400 mb-3">
             난이도 선택
           </h2>
           <div className="flex gap-3">
@@ -283,13 +283,13 @@ export default function AIConversationPage() {
                 onClick={() => setLevel(l.id)}
                 className={`flex-1 px-4 py-3 rounded-xl border-2 transition-all text-center ${
                   level === l.id
-                    ? "border-indigo-400 bg-indigo-50 text-indigo-700"
-                    : "border-gray-100 bg-white hover:border-gray-200"
+                    ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:border-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-300"
+                    : "border-gray-100 bg-white hover:border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-zinc-600 dark:text-zinc-300"
                 }`}
               >
                 <span className="text-xl">{l.emoji}</span>
                 <p className="font-semibold text-sm mt-1">{l.label}</p>
-                <p className="text-xs text-gray-400">{l.desc}</p>
+                <p className="text-xs text-gray-400 dark:text-zinc-500">{l.desc}</p>
               </button>
             ))}
           </div>
@@ -297,7 +297,7 @@ export default function AIConversationPage() {
 
         {/* Topic selection */}
         <div>
-          <h2 className="text-sm font-semibold text-gray-500 mb-3">
+          <h2 className="text-sm font-semibold text-gray-500 dark:text-zinc-400 mb-3">
             대화 주제
           </h2>
           <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
@@ -305,10 +305,10 @@ export default function AIConversationPage() {
               <button
                 key={t.id}
                 onClick={() => startConversation(t.id)}
-                className="bg-white border-2 border-gray-100 rounded-xl p-4 text-left hover:border-indigo-300 hover:shadow-lg transition-all"
+                className="bg-white dark:bg-zinc-800 border-2 border-gray-100 dark:border-zinc-700 rounded-xl p-4 text-left hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-lg transition-all"
               >
                 <span className="text-2xl">{t.emoji}</span>
-                <h3 className="font-bold mt-2">{t.label}</h3>
+                <h3 className="font-bold mt-2 dark:text-zinc-100">{t.label}</h3>
               </button>
             ))}
           </div>
@@ -322,22 +322,22 @@ export default function AIConversationPage() {
     <div className="max-w-2xl mx-auto px-4 py-4 flex flex-col h-[calc(100vh-80px)]">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <button onClick={reset} className="text-gray-500 hover:text-gray-700">
+        <button onClick={reset} className="text-gray-500 hover:text-gray-700 dark:text-zinc-400 dark:hover:text-zinc-200">
           <ArrowLeft size={20} />
         </button>
         <div className="text-center">
-          <h2 className="font-bold text-sm">
+          <h2 className="font-bold text-sm dark:text-zinc-100">
             {topics.find((t) => t.id === topic)?.emoji}{" "}
             {topics.find((t) => t.id === topic)?.label}
           </h2>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-gray-400 dark:text-zinc-500">
             {levels.find((l) => l.id === level)?.emoji}{" "}
             {levels.find((l) => l.id === level)?.label}
           </p>
         </div>
         <button
           onClick={reset}
-          className="text-gray-400 hover:text-gray-600"
+          className="text-gray-400 hover:text-gray-600 dark:text-zinc-500 dark:hover:text-zinc-300"
         >
           <RotateCcw size={18} />
         </button>
@@ -354,7 +354,7 @@ export default function AIConversationPage() {
               className={`max-w-[85%] rounded-2xl p-4 ${
                 msg.role === "user"
                   ? "bg-indigo-600 text-white"
-                  : "bg-gray-100 text-gray-800"
+                  : "bg-gray-100 dark:bg-zinc-800 text-gray-800 dark:text-zinc-200"
               }`}
             >
               <div className="flex items-center gap-1 mb-1">
@@ -426,8 +426,9 @@ export default function AIConversationPage() {
 
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 rounded-2xl p-4">
-              <Loader2 size={18} className="animate-spin text-gray-400" />
+            <div className="bg-gray-100 dark:bg-zinc-800 rounded-2xl p-4 flex items-center gap-2">
+              <Loader2 size={18} className="animate-spin text-gray-400 dark:text-zinc-500" />
+              <span className="text-sm text-gray-400 dark:text-zinc-500">생각 중...</span>
             </div>
           </div>
         )}
@@ -444,12 +445,16 @@ export default function AIConversationPage() {
       </div>
 
       {/* Input */}
-      <div className="border-t pt-3">
+      <div className="border-t dark:border-zinc-700 pt-3">
         <div className="flex gap-2">
           <textarea
             ref={inputRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              e.target.style.height = "auto";
+              e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -459,8 +464,8 @@ export default function AIConversationPage() {
             placeholder={isListening ? "듣고 있습니다..." : "메시지를 입력하세요..."}
             className={`flex-1 px-4 py-3 border-2 rounded-xl resize-none focus:outline-none text-sm ${
               isListening
-                ? "border-red-400 bg-red-50 focus:border-red-400"
-                : "border-gray-200 focus:border-indigo-400"
+                ? "border-red-400 bg-red-50 focus:border-red-400 dark:bg-red-950/30"
+                : "border-gray-200 focus:border-indigo-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-indigo-600"
             }`}
             rows={1}
             disabled={isLoading}
@@ -472,7 +477,7 @@ export default function AIConversationPage() {
               className={`px-4 py-3 rounded-xl transition-colors ${
                 isListening
                   ? "bg-red-500 text-white animate-pulse"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
               }`}
             >
               {isListening ? <MicOff size={18} /> : <Mic size={18} />}
@@ -486,7 +491,7 @@ export default function AIConversationPage() {
             <Send size={18} />
           </button>
         </div>
-        <p className="text-xs text-gray-400 mt-2 text-center">
+        <p className="text-xs text-gray-400 dark:text-zinc-500 mt-2 text-center">
           {speechSupported ? "마이크로 음성 입력 · " : ""}Enter로 전송 · Shift+Enter로 줄바꿈
         </p>
       </div>

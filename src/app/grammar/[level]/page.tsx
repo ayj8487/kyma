@@ -27,8 +27,8 @@ export default function GrammarLevelPage({ params }: { params: Promise<{ level: 
           <Link href="/grammar" className="text-violet-600 hover:underline text-sm flex items-center gap-1 mb-2">
             <ArrowLeft size={14} /> 문법 목록
           </Link>
-          <h1 className="text-3xl font-bold">JLPT {level} 문법</h1>
-          <p className="text-gray-500 mt-1">총 {grammarList.length}개 문법 포인트</p>
+          <h1 className="text-3xl font-bold dark:text-zinc-50">JLPT {level} 문법</h1>
+          <p className="text-gray-500 dark:text-zinc-400 mt-1">총 {grammarList.length}개 문법 포인트</p>
         </div>
         <Link
           href="/grammar/flashcard"
@@ -47,7 +47,7 @@ export default function GrammarLevelPage({ params }: { params: Promise<{ level: 
             className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
               selectedTag === tag
                 ? "bg-violet-600 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
             }`}
           >
             {tag}
@@ -59,26 +59,26 @@ export default function GrammarLevelPage({ params }: { params: Promise<{ level: 
         {filteredGrammar.map((g) => {
           const isExpanded = expandedId === g.id;
           return (
-            <div key={g.id} className="bg-white border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            <div key={g.id} className="bg-white dark:bg-zinc-800 border dark:border-zinc-700 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
               <div
                 onClick={() => setExpandedId(isExpanded ? null : g.id)}
                 className="w-full px-5 py-4 flex items-center justify-between text-left cursor-pointer"
               >
                 <div className="flex items-center gap-4">
-                  <div className="bg-violet-100 text-violet-700 w-10 h-10 rounded-lg flex items-center justify-center">
+                  <div className="bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 w-10 h-10 rounded-lg flex items-center justify-center">
                     <BookOpen size={18} />
                   </div>
                   <div>
                     <span
-                      className="text-lg font-bold text-violet-700 cursor-pointer hover:text-violet-900 transition-colors"
+                      className="text-lg font-bold text-violet-700 dark:text-violet-400 cursor-pointer hover:text-violet-900 dark:hover:text-violet-300 transition-colors"
                       onClick={(e) => { e.stopPropagation(); speakJapanese(g.pattern); }}
                     >{g.pattern}</span>
-                    <span className="text-gray-500 ml-3 text-sm">{g.meaning}</span>
+                    <span className="text-gray-500 dark:text-zinc-400 ml-3 text-sm">{g.meaning}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   {g.tags.map((t) => (
-                    <span key={t} className="px-2 py-0.5 bg-violet-50 text-violet-600 text-xs rounded-full hidden sm:inline">
+                    <span key={t} className="px-2 py-0.5 bg-violet-50 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 text-xs rounded-full hidden sm:inline">
                       {t}
                     </span>
                   ))}
@@ -94,23 +94,23 @@ export default function GrammarLevelPage({ params }: { params: Promise<{ level: 
               </div>
 
               {isExpanded && (
-                <div className="px-5 pb-5 border-t bg-gray-50">
+                <div className="px-5 pb-5 border-t dark:border-zinc-700 bg-gray-50 dark:bg-zinc-900">
                   <div className="mt-4 space-y-4">
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-700 mb-1">설명</h3>
-                      <p className="text-gray-600 text-sm">{g.explanation}</p>
+                      <h3 className="text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-1">설명</h3>
+                      <p className="text-gray-600 dark:text-zinc-400 text-sm">{g.explanation}</p>
                     </div>
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-700 mb-1">접속 방법</h3>
-                      <p className="text-violet-700 text-sm font-mono bg-violet-50 inline-block px-3 py-1 rounded">{g.formation}</p>
+                      <h3 className="text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-1">접속 방법</h3>
+                      <p className="text-violet-700 dark:text-violet-400 text-sm font-mono bg-violet-50 dark:bg-violet-900/30 inline-block px-3 py-1 rounded">{g.formation}</p>
                     </div>
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-700 mb-2">예문</h3>
+                      <h3 className="text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-2">예문</h3>
                       <div className="space-y-2">
                         {g.examples.map((ex, i) => (
-                          <div key={i} className="bg-white rounded-lg p-3 border">
+                          <div key={i} className="bg-white dark:bg-zinc-800 rounded-lg p-3 border dark:border-zinc-700">
                             <div className="flex items-center gap-2">
-                              <p className="text-base font-medium">{ex.japanese}</p>
+                              <p className="text-base font-medium dark:text-zinc-100">{ex.japanese}</p>
                               <button
                                 onClick={(e) => { e.stopPropagation(); speakJapanese(ex.japanese); }}
                                 className="text-violet-500 hover:text-violet-700 p-1"
@@ -119,8 +119,8 @@ export default function GrammarLevelPage({ params }: { params: Promise<{ level: 
                                 <Volume2 size={14} />
                               </button>
                             </div>
-                            <p className="text-xs text-gray-400 mt-0.5">{ex.reading}</p>
-                            <p className="text-sm text-gray-600 mt-1">{ex.korean}</p>
+                            <p className="text-xs text-gray-400 dark:text-zinc-500 mt-0.5">{ex.reading}</p>
+                            <p className="text-sm text-gray-600 dark:text-zinc-400 mt-1">{ex.korean}</p>
                           </div>
                         ))}
                       </div>
@@ -134,7 +134,7 @@ export default function GrammarLevelPage({ params }: { params: Promise<{ level: 
       </div>
 
       {filteredGrammar.length === 0 && (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-400 dark:text-zinc-500">
           <BookOpen size={48} className="mx-auto mb-4 opacity-50" />
           <p>해당 태그의 문법이 없습니다</p>
         </div>
