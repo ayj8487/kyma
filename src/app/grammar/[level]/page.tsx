@@ -60,9 +60,9 @@ export default function GrammarLevelPage({ params }: { params: Promise<{ level: 
           const isExpanded = expandedId === g.id;
           return (
             <div key={g.id} className="bg-white border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-              <button
+              <div
                 onClick={() => setExpandedId(isExpanded ? null : g.id)}
-                className="w-full px-5 py-4 flex items-center justify-between text-left"
+                className="w-full px-5 py-4 flex items-center justify-between text-left cursor-pointer"
               >
                 <div className="flex items-center gap-4">
                   <div className="bg-violet-100 text-violet-700 w-10 h-10 rounded-lg flex items-center justify-center">
@@ -91,7 +91,7 @@ export default function GrammarLevelPage({ params }: { params: Promise<{ level: 
                   </button>
                   {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </div>
-              </button>
+              </div>
 
               {isExpanded && (
                 <div className="px-5 pb-5 border-t bg-gray-50">

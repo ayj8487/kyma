@@ -132,11 +132,11 @@ export default function WordListPage({
                 className="overflow-hidden rounded-xl border border-zinc-200 bg-white transition-shadow hover:shadow-md dark:border-zinc-700 dark:bg-zinc-800/80"
               >
                 {/* Main card content */}
-                <button
+                <div
                   onClick={() =>
                     setExpandedId(isExpanded ? null : word.id)
                   }
-                  className="flex w-full items-center gap-4 px-5 py-4 text-left"
+                  className="flex w-full items-center gap-4 px-5 py-4 text-left cursor-pointer"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-3">
@@ -189,7 +189,7 @@ export default function WordListPage({
                       <ChevronDown className="h-4 w-4" />
                     )}
                   </div>
-                </button>
+                </div>
 
                 {/* Expanded content */}
                 {isExpanded && word.exampleSentence && (
