@@ -16,8 +16,14 @@ import {
 import { useStudyStore } from "@/store/useStudyStore";
 import { hiraganaData, katakanaData } from "@/data/kana";
 import { n5Words } from "@/data/words";
+import { n4Words } from "@/data/words-n4";
+import { n3Words } from "@/data/words-n3";
+import { n2Words } from "@/data/words-n2";
+import { grammarPoints } from "@/data/grammar";
 
 type TabType = "today" | "wrong" | "all";
+
+const allWords = [...n5Words, ...n4Words, ...n3Words, ...n2Words];
 
 function getContentInfo(contentType: string, contentId: string) {
   if (contentType === "hiragana") {
@@ -33,9 +39,15 @@ function getContentInfo(contentType: string, contentId: string) {
       : null;
   }
   if (contentType === "word") {
-    const word = n5Words.find((w) => w.id === contentId);
+    const word = allWords.find((w) => w.id === contentId);
     return word
       ? { display: word.word, sub: `${word.reading} - ${word.meaning}`, label: "단어" }
+      : null;
+  }
+  if (contentType === "grammar") {
+    const grammar = grammarPoints.find((g) => g.id === contentId);
+    return grammar
+      ? { display: grammar.pattern, sub: grammar.meaning, label: "문법" }
       : null;
   }
   return null;

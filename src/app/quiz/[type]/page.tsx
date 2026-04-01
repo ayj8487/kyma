@@ -17,7 +17,9 @@ import {
   RotateCcw,
   Clock,
   Target,
+  Volume2,
 } from "lucide-react";
+import { speakJapanese } from "@/lib/tts";
 
 interface Question {
   id: string;
@@ -559,9 +561,19 @@ export default function QuizTypePage({
             {questionLabel}
           </p>
           <div className="flex min-h-[140px] w-full flex-col items-center justify-center rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-800 px-4">
-            <span className={`font-bold text-zinc-900 dark:text-zinc-50 ${type === "grammar" ? "text-3xl sm:text-4xl" : "text-5xl sm:text-6xl"}`}>
+            <span
+              className={`font-bold text-zinc-900 dark:text-zinc-50 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors ${type === "grammar" ? "text-3xl sm:text-4xl" : "text-5xl sm:text-6xl"}`}
+              onClick={() => speakJapanese(currentQuestion.question)}
+            >
               {currentQuestion.question}
             </span>
+            <button
+              onClick={() => speakJapanese(currentQuestion.question)}
+              className="mt-2 flex items-center gap-1 rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-600 transition-colors hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+            >
+              <Volume2 className="h-3.5 w-3.5" />
+              발음 듣기
+            </button>
             {currentQuestion.questionSub && (
               <p className="mt-2 text-sm text-indigo-500 dark:text-indigo-400 text-center">
                 {currentQuestion.questionSub}

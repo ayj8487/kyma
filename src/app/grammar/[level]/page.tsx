@@ -69,7 +69,10 @@ export default function GrammarLevelPage({ params }: { params: Promise<{ level: 
                     <BookOpen size={18} />
                   </div>
                   <div>
-                    <span className="text-lg font-bold text-violet-700">{g.pattern}</span>
+                    <span
+                      className="text-lg font-bold text-violet-700 cursor-pointer hover:text-violet-900 transition-colors"
+                      onClick={(e) => { e.stopPropagation(); speakJapanese(g.pattern); }}
+                    >{g.pattern}</span>
                     <span className="text-gray-500 ml-3 text-sm">{g.meaning}</span>
                   </div>
                 </div>

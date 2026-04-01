@@ -140,7 +140,10 @@ export default function WordListPage({
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-3">
-                      <span className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                      <span
+                        className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                        onClick={(e) => { e.stopPropagation(); speakJapanese(word.word); }}
+                      >
                         {word.word}
                       </span>
                       <span className="text-sm text-indigo-500 dark:text-indigo-400">
