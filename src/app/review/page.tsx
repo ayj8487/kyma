@@ -149,7 +149,7 @@ export default function ReviewPage() {
                 setCurrentIndex(0);
                 setShowAnswer(false);
               }}
-              className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-lg px-2 py-2 text-xs sm:px-4 sm:py-2.5 sm:text-sm font-medium transition-colors ${
                 activeTab === tab.id
                   ? "bg-white text-foreground shadow-sm dark:bg-warm-100 dark:text-foreground"
                   : "text-accent-indigo hover:text-foreground dark:text-warm-400"
@@ -262,7 +262,11 @@ export default function ReviewPage() {
                     </span>
 
                     <div className="my-8">
-                      <p className="text-6xl font-bold text-foreground sm:text-7xl">
+                      <p className={`font-bold text-foreground ${
+                        contentInfo.display.length > 4
+                          ? "text-2xl sm:text-4xl"
+                          : "text-5xl sm:text-7xl"
+                      }`}>
                         {contentInfo.display}
                       </p>
                     </div>
@@ -278,7 +282,7 @@ export default function ReviewPage() {
                     ) : (
                       <div>
                         <div className="mb-6 rounded-xl bg-warm-50 p-4 dark:bg-warm-200">
-                          <p className="text-xl font-semibold text-foreground">
+                          <p className="text-lg sm:text-xl font-semibold text-foreground">
                             {contentInfo.sub}
                           </p>
                         </div>
@@ -360,18 +364,22 @@ export default function ReviewPage() {
                             key={`${item.contentType}:${item.contentId}`}
                             className="flex items-center gap-4 rounded-xl border border-warm-200 bg-white p-4 dark:border-warm-200 dark:bg-warm-100"
                           >
-                            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-sakura-50 text-2xl font-bold text-foreground dark:bg-sakura-100">
-                              {info.display}
+                            <div className={`flex items-center justify-center rounded-lg bg-sakura-50 font-bold text-foreground dark:bg-sakura-100 shrink-0 ${
+                              info.display.length > 4
+                                ? "h-12 w-auto min-w-12 px-2 text-sm"
+                                : "h-12 w-12 text-2xl"
+                            }`}>
+                              <span className="truncate">{info.display}</span>
                             </div>
-                            <div className="flex-1">
-                              <p className="font-medium text-foreground">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-foreground truncate">
                                 {info.sub}
                               </p>
                               <p className="text-sm text-accent-indigo dark:text-warm-400">
                                 {info.label}
                               </p>
                             </div>
-                            <div className="flex gap-3 text-sm">
+                            <div className="flex gap-3 text-sm shrink-0">
                               <span className="flex items-center gap-1 text-emerald-600">
                                 <CheckCircle2 size={14} />
                                 {item.correctCount}
@@ -419,7 +427,11 @@ export default function ReviewPage() {
                         </span>
 
                         <div className="my-8">
-                          <p className="text-6xl font-bold text-foreground sm:text-7xl">
+                          <p className={`font-bold text-foreground ${
+                            contentInfo.display.length > 4
+                              ? "text-2xl sm:text-4xl"
+                              : "text-5xl sm:text-7xl"
+                          }`}>
                             {contentInfo.display}
                           </p>
                         </div>
@@ -435,7 +447,7 @@ export default function ReviewPage() {
                         ) : (
                           <div>
                             <div className="mb-6 rounded-xl bg-warm-50 p-4 dark:bg-warm-200">
-                              <p className="text-xl font-semibold text-foreground">
+                              <p className="text-lg sm:text-xl font-semibold text-foreground">
                                 {contentInfo.sub}
                               </p>
                             </div>
@@ -548,11 +560,11 @@ export default function ReviewPage() {
                             key={`${item.contentType}:${item.contentId}`}
                             className="flex items-center gap-4 rounded-xl border border-warm-200 bg-white p-3 dark:border-warm-200 dark:bg-warm-100"
                           >
-                            <span className="text-2xl font-bold">
+                            <span className={`font-bold shrink-0 ${info.display.length > 4 ? "text-sm" : "text-2xl"}`}>
                               {info.display}
                             </span>
-                            <div className="flex-1">
-                              <p className="text-sm font-medium text-foreground">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-foreground truncate">
                                 {info.sub}
                               </p>
                             </div>
@@ -585,11 +597,11 @@ export default function ReviewPage() {
                             key={`${item.contentType}:${item.contentId}`}
                             className="flex items-center gap-4 rounded-xl border border-warm-200 bg-white p-3 dark:border-warm-200 dark:bg-warm-100"
                           >
-                            <span className="text-2xl font-bold">
+                            <span className={`font-bold shrink-0 ${info.display.length > 4 ? "text-sm" : "text-2xl"}`}>
                               {info.display}
                             </span>
-                            <div className="flex-1">
-                              <p className="text-sm font-medium text-foreground">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-foreground truncate">
                                 {info.sub}
                               </p>
                             </div>

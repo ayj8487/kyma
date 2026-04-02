@@ -80,9 +80,7 @@
   --font-sans: var(--font-jua), var(--font-noto-sans-jp);
 }
 
-/* Force light mode regardless of system preference */
 html {
-  color-scheme: light;
   scroll-behavior: smooth;
 }
 
