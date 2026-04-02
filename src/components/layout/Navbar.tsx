@@ -210,7 +210,7 @@ export function Navbar() {
 
       {/* Mobile Navigation */}
       {isMobileMenuOpen && (
-        <div className="border-t border-gray-100 bg-white md:hidden dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="border-t border-gray-100 bg-white md:hidden dark:border-zinc-800 dark:bg-zinc-900 max-h-[calc(100vh-56px)] overflow-y-auto">
           <div className="space-y-0.5 px-4 py-3">
             {navLinks.map(({ href, label, icon: Icon }) => {
               const isActive =
