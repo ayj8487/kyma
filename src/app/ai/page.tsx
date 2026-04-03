@@ -10,10 +10,10 @@ export default function AIPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-2">🤖 AI 학습</h1>
-      <p className="text-gray-600 mb-8">AI 기반 일본어 학습 도구를 활용하세요</p>
+      <p className="text-gray-600 dark:text-zinc-400 mb-8">AI 기반 일본어 학습 도구를 활용하세요</p>
       <div className="grid sm:grid-cols-2 gap-6">
         {features.map((f) => (
-          <Link key={f.href} href={f.href} className={`group bg-white border-2 border-${f.color}-100 rounded-2xl p-6 hover:border-${f.color}-400 hover:shadow-lg transition-all`}>
+          <Link key={f.href} href={f.href} className={`group bg-white border-2 border-${f.color}-100 rounded-2xl p-6 hover:border-${f.color}-400 hover:shadow-lg transition-all dark:bg-zinc-800 dark:border-${f.color}-800 dark:hover:border-${f.color}-500`}>
             <div className={`w-14 h-14 bg-${f.color}-100 rounded-xl flex items-center justify-center mb-4 text-${f.color}-600 group-hover:scale-110 transition-transform`}>
               <f.icon size={28} />
             </div>
@@ -21,7 +21,7 @@ export default function AIPage() {
               <h2 className="text-xl font-bold">{f.title}</h2>
               <span className={`px-2 py-0.5 bg-${f.color}-100 text-${f.color}-700 text-xs rounded-full`}>{f.badge}</span>
             </div>
-            <p className="text-gray-500 text-sm">{f.desc}</p>
+            <p className="text-gray-500 dark:text-zinc-400 text-sm">{f.desc}</p>
           </Link>
         ))}
       </div>

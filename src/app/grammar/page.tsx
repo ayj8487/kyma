@@ -13,14 +13,14 @@ export default function GrammarPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-2">문법 학습</h1>
-      <p className="text-gray-600 mb-8">JLPT 레벨별 일본어 문법을 체계적으로 학습하세요</p>
+      <p className="text-gray-600 dark:text-zinc-400 mb-8">JLPT 레벨별 일본어 문법을 체계적으로 학습하세요</p>
 
       <div className="grid gap-4">
         {levels.map((l) => (
           <div key={l.level} className={`relative rounded-xl border-2 p-6 transition-all ${
             l.available
-              ? "border-violet-200 bg-white hover:border-violet-400 hover:shadow-lg cursor-pointer"
-              : "border-gray-100 bg-gray-50 opacity-60"
+              ? "border-violet-200 bg-white hover:border-violet-400 hover:shadow-lg cursor-pointer dark:border-violet-800 dark:bg-zinc-800 dark:hover:border-violet-500"
+              : "border-gray-100 bg-gray-50 opacity-60 dark:border-zinc-700 dark:bg-zinc-800/50"
           }`}>
             {l.available ? (
               <Link href={`/grammar/${l.level}`} className="absolute inset-0" />
@@ -28,7 +28,7 @@ export default function GrammarPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
-                  l.available ? "bg-violet-100 text-violet-600" : "bg-gray-200 text-gray-400"
+                  l.available ? "bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400" : "bg-gray-200 text-gray-400 dark:bg-zinc-700 dark:text-zinc-500"
                 }`}>
                   {l.available ? <BookOpen size={28} /> : <Lock size={28} />}
                 </div>
@@ -36,18 +36,18 @@ export default function GrammarPage() {
                   <div className="flex items-center gap-2">
                     <h2 className="text-xl font-bold">JLPT {l.level}</h2>
                     {l.available ? (
-                      <span className="px-2 py-0.5 bg-violet-100 text-violet-700 text-xs rounded-full font-medium">
+                      <span className="px-2 py-0.5 bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 text-xs rounded-full font-medium">
                         {l.count}개 문법
                       </span>
                     ) : (
-                      <span className="px-2 py-0.5 bg-gray-200 text-gray-500 text-xs rounded-full">준비 중</span>
+                      <span className="px-2 py-0.5 bg-gray-200 text-gray-500 dark:bg-zinc-700 dark:text-zinc-400 text-xs rounded-full">준비 중</span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-500 mt-0.5">{l.desc} — {l.detail}</p>
+                  <p className="text-sm text-gray-500 dark:text-zinc-400 mt-0.5">{l.desc} — {l.detail}</p>
                 </div>
               </div>
               {l.available && (
-                <span className="text-violet-500 font-medium text-sm">학습하기 →</span>
+                <span className="text-violet-500 dark:text-violet-400 font-medium text-sm">학습하기 →</span>
               )}
             </div>
           </div>

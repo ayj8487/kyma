@@ -64,11 +64,11 @@ const features = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-zinc-900">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         {/* Soft gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-pink-50/80 via-white to-white" />
+        <div className="absolute inset-0 bg-gradient-to-b from-pink-50/80 via-white to-white dark:from-pink-950/30 dark:via-zinc-900 dark:to-zinc-900" />
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-pink-100/50 blur-3xl" />
           <div className="absolute top-20 -left-20 h-72 w-72 rounded-full bg-violet-100/30 blur-3xl" />
@@ -78,13 +78,13 @@ export default function Home() {
         <div className="relative mx-auto max-w-5xl px-4 pb-16 pt-20 sm:px-6 sm:pt-28 lg:px-8 lg:pt-36">
           <div className="flex flex-col items-center text-center">
             {/* Badge */}
-            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white px-4 py-1.5 text-sm font-medium text-pink-500 shadow-sm">
+            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white px-4 py-1.5 text-sm font-medium text-pink-500 shadow-sm dark:bg-zinc-800 dark:border-pink-800">
               <Sparkles size={14} />
               <span>일본어 학습 플랫폼</span>
             </div>
 
             {/* Title */}
-            <h1 className="max-w-3xl text-3xl font-bold leading-tight tracking-tight text-gray-800 sm:text-4xl lg:text-5xl">
+            <h1 className="max-w-3xl text-3xl font-bold leading-tight tracking-tight text-gray-800 dark:text-zinc-100 sm:text-4xl lg:text-5xl">
               일본어,{" "}
               <span className="bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
                 쉽고 재미있게
@@ -94,7 +94,7 @@ export default function Home() {
             </h1>
 
             {/* Subtitle */}
-            <p className="mt-6 max-w-xl text-sm leading-relaxed text-gray-500 sm:text-base">
+            <p className="mt-6 max-w-xl text-sm leading-relaxed text-gray-500 dark:text-zinc-400 sm:text-base">
               히라가나부터 단어, 문법까지 — 체계적인 커리큘럼과 다양한 퀴즈로
               일본어를 즐겁게 마스터하세요.
             </p>
@@ -110,14 +110,14 @@ export default function Home() {
               </Link>
               <Link
                 href="/kana/hiragana"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-8 py-3.5 text-base font-semibold text-gray-600 shadow-sm transition-all hover:border-pink-200 hover:text-pink-500 hover:shadow-md active:scale-[0.98]"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-8 py-3.5 text-base font-semibold text-gray-600 shadow-sm transition-all hover:border-pink-200 hover:text-pink-500 hover:shadow-md active:scale-[0.98] dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-pink-700 dark:hover:text-pink-400"
               >
                 히라가나 둘러보기
               </Link>
             </div>
 
             {/* Decorative Japanese text */}
-            <div className="mt-20 select-none text-6xl font-extralight tracking-[0.3em] text-pink-100 sm:text-8xl lg:text-9xl">
+            <div className="mt-20 select-none text-6xl font-extralight tracking-[0.3em] text-pink-100 dark:text-pink-900/50 sm:text-8xl lg:text-9xl">
               きょうま
             </div>
           </div>
@@ -128,10 +128,10 @@ export default function Home() {
       <section className="py-20 sm:py-28">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-800 sm:text-3xl">
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-zinc-100 sm:text-3xl">
               다양한 학습 기능
             </h2>
-            <p className="mt-3 text-base text-gray-400">
+            <p className="mt-3 text-base text-gray-400 dark:text-zinc-500">
               Kyma와 함께 체계적으로 일본어를 학습하세요
             </p>
           </div>
@@ -141,15 +141,15 @@ export default function Home() {
               <Link
                 key={title}
                 href={href}
-                className="group rounded-2xl border border-gray-100 bg-white p-6 transition-all hover:border-pink-100 hover:shadow-lg hover:shadow-pink-50"
+                className="group rounded-2xl border border-gray-100 bg-white p-6 transition-all hover:border-pink-100 hover:shadow-lg hover:shadow-pink-50 dark:bg-zinc-800 dark:border-zinc-700 dark:hover:border-pink-800"
               >
                 <div className={`mb-4 inline-flex rounded-xl p-3 ${color}`}>
                   <Icon size={22} />
                 </div>
-                <h3 className="mb-2 text-base font-semibold text-gray-700">
+                <h3 className="mb-2 text-base font-semibold text-gray-700 dark:text-zinc-200">
                   {title}
                 </h3>
-                <p className="text-sm leading-relaxed text-gray-400">
+                <p className="text-sm leading-relaxed text-gray-400 dark:text-zinc-500">
                   {description}
                 </p>
               </Link>
@@ -160,16 +160,16 @@ export default function Home() {
 
       {/* CTA Section */}
       <section className="mx-4 mb-16 sm:mx-6 lg:mx-auto lg:max-w-5xl">
-        <div className="rounded-3xl bg-gradient-to-r from-pink-50 to-rose-50 px-6 py-14 text-center sm:px-12">
-          <h2 className="text-2xl font-bold text-gray-700 sm:text-3xl">
+        <div className="rounded-3xl bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30 px-6 py-14 text-center sm:px-12">
+          <h2 className="text-2xl font-bold text-gray-700 dark:text-zinc-100 sm:text-3xl">
             지금 바로 시작하세요
           </h2>
-          <p className="mt-3 text-base text-gray-400">
+          <p className="mt-3 text-base text-gray-400 dark:text-zinc-500">
             매일 조금씩, 꾸준히 학습하면 일본어 실력이 쑥쑥 자랍니다
           </p>
           <Link
             href="/dashboard"
-            className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 text-base font-semibold text-pink-500 shadow-sm transition-all hover:shadow-md active:scale-[0.98]"
+            className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 text-base font-semibold text-pink-500 shadow-sm transition-all hover:shadow-md active:scale-[0.98] dark:bg-zinc-800"
           >
             대시보드로 이동
             <ArrowRight size={18} />
@@ -178,7 +178,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-100 py-8">
+      <footer className="border-t border-gray-100 dark:border-zinc-800 py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <div className="flex items-baseline gap-1.5">

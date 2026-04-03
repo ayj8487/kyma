@@ -112,21 +112,21 @@ export default function TypingPage() {
   if (!mode) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <Link href="/dashboard" className="text-indigo-600 hover:underline text-sm flex items-center gap-1 mb-6">
+        <Link href="/dashboard" className="text-indigo-600 dark:text-indigo-400 hover:underline text-sm flex items-center gap-1 mb-6">
           <ArrowLeft size={14} /> 대시보드
         </Link>
         <h1 className="text-3xl font-bold mb-2">⌨️ 일본어 타자 연습</h1>
-        <p className="text-gray-600 mb-8">60초 안에 최대한 많은 문자를 정확하게 입력하세요</p>
+        <p className="text-gray-600 dark:text-zinc-400 mb-8">60초 안에 최대한 많은 문자를 정확하게 입력하세요</p>
         <div className="grid sm:grid-cols-3 gap-4">
           {[
             { m: "hiragana" as Mode, icon: "あ", title: "히라가나 타이핑", desc: "히라가나를 보고 로마지 입력", color: "indigo" },
             { m: "katakana" as Mode, icon: "ア", title: "가타카나 타이핑", desc: "가타카나를 보고 로마지 입력", color: "violet" },
             { m: "word" as Mode, icon: "漢", title: "단어 타이핑", desc: "단어를 보고 히라가나 입력", color: "purple" },
           ].map(({ m, icon, title, desc, color }) => (
-            <button key={m} onClick={() => startGame(m)} className={`p-6 rounded-xl border-2 border-${color}-200 hover:border-${color}-400 bg-white hover:shadow-lg transition-all text-left`}>
-              <div className={`text-4xl mb-3 w-14 h-14 bg-${color}-100 rounded-xl flex items-center justify-center text-${color}-600 font-bold`}>{icon}</div>
+            <button key={m} onClick={() => startGame(m)} className={`p-6 rounded-xl border-2 border-${color}-200 hover:border-${color}-400 bg-white hover:shadow-lg transition-all text-left dark:bg-zinc-800 dark:border-${color}-800 dark:hover:border-${color}-500`}>
+              <div className={`text-4xl mb-3 w-14 h-14 bg-${color}-100 rounded-xl flex items-center justify-center text-${color}-600 font-bold dark:bg-${color}-900/40 dark:text-${color}-400`}>{icon}</div>
               <h3 className="font-bold text-lg">{title}</h3>
-              <p className="text-gray-500 text-sm mt-1">{desc}</p>
+              <p className="text-gray-500 dark:text-zinc-400 text-sm mt-1">{desc}</p>
             </button>
           ))}
         </div>
@@ -140,28 +140,28 @@ export default function TypingPage() {
         <div className="text-6xl mb-4">🎯</div>
         <h2 className="text-3xl font-bold mb-2">타이핑 결과</h2>
         <div className="grid grid-cols-2 gap-4 my-8">
-          <div className="bg-indigo-50 rounded-xl p-4">
-            <div className="text-3xl font-bold text-indigo-600">{score}</div>
-            <div className="text-sm text-gray-500">정답 수</div>
+          <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-xl p-4">
+            <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{score}</div>
+            <div className="text-sm text-gray-500 dark:text-zinc-400">정답 수</div>
           </div>
-          <div className="bg-green-50 rounded-xl p-4">
-            <div className="text-3xl font-bold text-green-600">{accuracy}%</div>
-            <div className="text-sm text-gray-500">정확도</div>
+          <div className="bg-green-50 dark:bg-green-900/30 rounded-xl p-4">
+            <div className="text-3xl font-bold text-green-600 dark:text-green-400">{accuracy}%</div>
+            <div className="text-sm text-gray-500 dark:text-zinc-400">정확도</div>
           </div>
-          <div className="bg-violet-50 rounded-xl p-4">
-            <div className="text-3xl font-bold text-violet-600">{bestStreak}</div>
-            <div className="text-sm text-gray-500">최고 연속</div>
+          <div className="bg-violet-50 dark:bg-violet-900/30 rounded-xl p-4">
+            <div className="text-3xl font-bold text-violet-600 dark:text-violet-400">{bestStreak}</div>
+            <div className="text-sm text-gray-500 dark:text-zinc-400">최고 연속</div>
           </div>
-          <div className="bg-orange-50 rounded-xl p-4">
-            <div className="text-3xl font-bold text-orange-600">{score}</div>
-            <div className="text-sm text-gray-500">WPM</div>
+          <div className="bg-orange-50 dark:bg-orange-900/30 rounded-xl p-4">
+            <div className="text-3xl font-bold text-orange-600 dark:text-orange-400">{score}</div>
+            <div className="text-sm text-gray-500 dark:text-zinc-400">WPM</div>
           </div>
         </div>
         <div className="flex gap-3 justify-center">
           <button onClick={() => startGame(mode)} className="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 flex items-center gap-2">
             <RotateCcw size={16} /> 다시 하기
           </button>
-          <button onClick={() => setMode(null)} className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300">
+          <button onClick={() => setMode(null)} className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600">
             모드 선택
           </button>
         </div>
@@ -174,7 +174,7 @@ export default function TypingPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
-        <button onClick={() => { setMode(null); setIsRunning(false); }} className="text-gray-500 hover:text-gray-700">
+        <button onClick={() => { setMode(null); setIsRunning(false); }} className="text-gray-500 hover:text-gray-700 dark:text-zinc-400 dark:hover:text-zinc-200">
           <ArrowLeft size={20} />
         </button>
         <div className="flex items-center gap-6 text-sm">
@@ -229,14 +229,14 @@ export default function TypingPage() {
           value={input}
           onChange={(e) => handleInput(e.target.value)}
           className={`w-full pl-12 pr-4 py-4 text-xl text-center border-2 rounded-xl outline-none transition-colors ${
-            feedback === "correct" ? "border-green-400 bg-green-50" : feedback === "wrong" ? "border-red-400 bg-red-50" : "border-gray-200 focus:border-indigo-400"
+            feedback === "correct" ? "border-green-400 bg-green-50 dark:bg-green-900/20" : feedback === "wrong" ? "border-red-400 bg-red-50 dark:bg-red-900/20" : "border-gray-200 focus:border-indigo-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-indigo-500"
           }`}
           placeholder="여기에 입력..."
           autoFocus
         />
       </div>
 
-      <div className="mt-4 bg-gray-100 rounded-full h-2">
+      <div className="mt-4 bg-gray-100 dark:bg-zinc-700 rounded-full h-2">
         <div className="bg-indigo-500 h-2 rounded-full transition-all" style={{ width: `${(timeLeft / 60) * 100}%` }} />
       </div>
     </div>
