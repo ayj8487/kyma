@@ -12,7 +12,9 @@ import {
   Sparkles,
   Eye,
   EyeOff,
+  Volume2,
 } from "lucide-react";
+import { speakJapanese } from "@/lib/tts";
 import { useStudyStore } from "@/store/useStudyStore";
 import { hiraganaData, katakanaData } from "@/data/kana";
 import { n5Words } from "@/data/words";
@@ -29,25 +31,33 @@ function getContentInfo(contentType: string, contentId: string) {
   if (contentType === "hiragana") {
     const kana = hiraganaData.find((k) => k.id === contentId);
     return kana
-      ? { display: kana.character, sub: kana.romaji, label: "히라가나" }
+      ? { display: kana.character, sub: kana.romaji, label: "히라가나", speak: kana.character }
       : null;
   }
   if (contentType === "katakana") {
     const kana = katakanaData.find((k) => k.id === contentId);
     return kana
-      ? { display: kana.character, sub: kana.romaji, label: "가타카나" }
+      ? { display: kana.character, sub: kana.romaji, label: "가타카나", speak: kana.character }
       : null;
+  }
+  if (contentType === "kana") {
+    // 퀴즈에서 "kana" 타입으로 저장됨 — ID 접두사로 히라가나/가타카나 구분
+    const hKana = hiraganaData.find((k) => k.id === contentId);
+    if (hKana) return { display: hKana.character, sub: hKana.romaji, label: "히라가나", speak: hKana.character };
+    const kKana = katakanaData.find((k) => k.id === contentId);
+    if (kKana) return { display: kKana.character, sub: kKana.romaji, label: "가타카나", speak: kKana.character };
+    return null;
   }
   if (contentType === "word") {
     const word = allWords.find((w) => w.id === contentId);
     return word
-      ? { display: word.word, sub: `${word.reading} - ${word.meaning}`, label: "단어" }
+      ? { display: word.word, sub: `${word.reading} - ${word.meaning}`, label: "단어", speak: word.word }
       : null;
   }
   if (contentType === "grammar") {
     const grammar = grammarPoints.find((g) => g.id === contentId);
     return grammar
-      ? { display: grammar.pattern, sub: grammar.meaning, label: "문법" }
+      ? { display: grammar.pattern, sub: grammar.meaning, label: "문법", speak: grammar.pattern }
       : null;
   }
   return null;
@@ -68,8 +78,14 @@ export default function ReviewPage() {
     incrementStudyCount,
   } = useStudyStore();
 
-  const dueItems = useMemo(() => getDueItems(), [progress]);
-  const wrongItems = useMemo(() => getWrongItems(), [progress]);
+  const dueItems = useMemo(
+    () => getDueItems().filter((p) => getContentInfo(p.contentType, p.contentId) !== null),
+    [progress]
+  );
+  const wrongItems = useMemo(
+    () => getWrongItems().filter((p) => getContentInfo(p.contentType, p.contentId) !== null),
+    [progress]
+  );
   const allItems = useMemo(() => Object.values(progress), [progress]);
 
   const learningItems = useMemo(
@@ -262,13 +278,21 @@ export default function ReviewPage() {
                     </span>
 
                     <div className="my-8">
-                      <p className={`font-bold text-foreground ${
+                      <p
+                        onClick={() => speakJapanese(contentInfo.speak)}
+                        className={`font-bold text-foreground cursor-pointer hover:text-sakura-500 transition-colors ${
                         contentInfo.display.length > 4
                           ? "text-2xl sm:text-4xl"
                           : "text-5xl sm:text-7xl"
                       }`}>
                         {contentInfo.display}
                       </p>
+                      <button
+                        onClick={() => speakJapanese(contentInfo.speak)}
+                        className="mt-3 inline-flex items-center gap-1 text-sm text-accent-indigo hover:text-sakura-500 transition-colors dark:text-warm-400"
+                      >
+                        <Volume2 size={16} /> 발음 듣기
+                      </button>
                     </div>
 
                     {!showAnswer ? (
@@ -364,7 +388,9 @@ export default function ReviewPage() {
                             key={`${item.contentType}:${item.contentId}`}
                             className="flex items-center gap-4 rounded-xl border border-warm-200 bg-white p-4 dark:border-warm-200 dark:bg-warm-100"
                           >
-                            <div className={`flex items-center justify-center rounded-lg bg-sakura-50 font-bold text-foreground dark:bg-sakura-100 shrink-0 ${
+                            <div
+                              onClick={() => speakJapanese(info.speak)}
+                              className={`flex items-center justify-center rounded-lg bg-sakura-50 font-bold text-foreground dark:bg-sakura-100 shrink-0 cursor-pointer hover:bg-sakura-100 dark:hover:bg-sakura-200 transition-colors ${
                               info.display.length > 4
                                 ? "h-12 w-auto min-w-12 px-2 text-sm"
                                 : "h-12 w-12 text-2xl"
@@ -427,13 +453,21 @@ export default function ReviewPage() {
                         </span>
 
                         <div className="my-8">
-                          <p className={`font-bold text-foreground ${
+                          <p
+                            onClick={() => speakJapanese(contentInfo.speak)}
+                            className={`font-bold text-foreground cursor-pointer hover:text-sakura-500 transition-colors ${
                             contentInfo.display.length > 4
                               ? "text-2xl sm:text-4xl"
                               : "text-5xl sm:text-7xl"
                           }`}>
                             {contentInfo.display}
                           </p>
+                          <button
+                            onClick={() => speakJapanese(contentInfo.speak)}
+                            className="mt-3 inline-flex items-center gap-1 text-sm text-accent-indigo hover:text-sakura-500 transition-colors dark:text-warm-400"
+                          >
+                            <Volume2 size={16} /> 발음 듣기
+                          </button>
                         </div>
 
                         {!showAnswer ? (
@@ -560,7 +594,9 @@ export default function ReviewPage() {
                             key={`${item.contentType}:${item.contentId}`}
                             className="flex items-center gap-4 rounded-xl border border-warm-200 bg-white p-3 dark:border-warm-200 dark:bg-warm-100"
                           >
-                            <span className={`font-bold shrink-0 ${info.display.length > 4 ? "text-sm" : "text-2xl"}`}>
+                            <span
+                              onClick={() => speakJapanese(info.speak)}
+                              className={`font-bold shrink-0 cursor-pointer hover:text-sakura-500 transition-colors ${info.display.length > 4 ? "text-sm" : "text-2xl"}`}>
                               {info.display}
                             </span>
                             <div className="flex-1 min-w-0">
@@ -597,7 +633,9 @@ export default function ReviewPage() {
                             key={`${item.contentType}:${item.contentId}`}
                             className="flex items-center gap-4 rounded-xl border border-warm-200 bg-white p-3 dark:border-warm-200 dark:bg-warm-100"
                           >
-                            <span className={`font-bold shrink-0 ${info.display.length > 4 ? "text-sm" : "text-2xl"}`}>
+                            <span
+                              onClick={() => speakJapanese(info.speak)}
+                              className={`font-bold shrink-0 cursor-pointer hover:text-sakura-500 transition-colors ${info.display.length > 4 ? "text-sm" : "text-2xl"}`}>
                               {info.display}
                             </span>
                             <div className="flex-1 min-w-0">
