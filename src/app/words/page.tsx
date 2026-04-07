@@ -4,28 +4,28 @@ import { BookOpen, Lock } from "lucide-react";
 const levels = [
   {
     level: "N5",
-    words: 40,
+    words: 60,
     description: "입문 단계",
     detail: "기초 일상 회화에 필요한 단어",
     available: true,
   },
   {
     level: "N4",
-    words: 40,
+    words: 60,
     description: "초급 단계",
     detail: "기본적인 일본어를 이해할 수 있는 수준",
     available: true,
   },
   {
     level: "N3",
-    words: 30,
+    words: 50,
     description: "중급 단계",
     detail: "일상적인 일본어를 어느 정도 이해할 수 있는 수준",
     available: true,
   },
   {
     level: "N2",
-    words: 40,
+    words: 60,
     description: "중상급 단계",
     detail: "일상적인 장면에서 사용되는 일본어의 이해에 더해, 폭넓은 장면의 일본어를 이해",
     available: true,
