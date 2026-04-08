@@ -19,6 +19,7 @@ const jua = Jua({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://kymanova.com"),
   title: "Kyma - 일본어 학습",
   description:
     "Kyma는 히라가나, 가타카나, 단어 학습과 퀴즈를 통해 일본어를 쉽고 재미있게 배울 수 있는 학습 플랫폼입니다.",
