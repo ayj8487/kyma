@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Film, Volume2, Eye, EyeOff, Shuffle, ChevronDown, ChevronUp, Bookmark } from "lucide-react";
+import { Film, Volume2, Eye, EyeOff, Shuffle, ChevronDown, ChevronUp, Bookmark, Filter } from "lucide-react";
 import { animeQuotes } from "@/data/anime-quotes";
 import { speakJapanese } from "@/lib/tts";
 import { useStudyStore } from "@/store/useStudyStore";
@@ -17,6 +17,7 @@ export default function AnimePage() {
   const [animeFilter, setAnimeFilter] = useState("all");
   const [showTranslation, setShowTranslation] = useState<Record<string, boolean>>({});
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showAllAnime, setShowAllAnime] = useState(false);
   const { toggleBookmark, isBookmarked } = useStudyStore();
 
   const animeList = useMemo(() => {
@@ -49,17 +50,35 @@ export default function AnimePage() {
       <h1 className="text-3xl font-bold mb-2 flex items-center gap-2 dark:text-zinc-50"><Film className="text-purple-600 dark:text-purple-400" /> 애니 대사로 학습</h1>
       <p className="text-gray-600 dark:text-zinc-400 mb-6">인기 애니메이션 명대사로 일본어를 재미있게 배우세요</p>
 
-      <div className="flex flex-wrap gap-2 mb-4">
-        <button onClick={randomQuote} className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm flex items-center gap-1 hover:bg-purple-700"><Shuffle size={14} /> 랜덤 명대사</button>
-        {[{ key: "all", label: "전체" }, { key: "beginner", label: "초급" }, { key: "intermediate", label: "중급" }, { key: "advanced", label: "고급" }].map((f) => (
-          <button key={f.key} onClick={() => setDiffFilter(f.key)} className={`px-3 py-2 rounded-lg text-sm font-medium ${diffFilter === f.key ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"}`}>{f.label}</button>
-        ))}
-      </div>
-      <div className="flex flex-wrap gap-1 mb-6">
-        <button onClick={() => setAnimeFilter("all")} className={`px-2 py-1 rounded text-xs ${animeFilter === "all" ? "bg-purple-100 text-purple-700 font-medium dark:bg-purple-900/40 dark:text-purple-300" : "bg-gray-50 text-gray-500 dark:bg-zinc-800 dark:text-zinc-400"}`}>전체 작품</button>
-        {animeList.map((a) => (
-          <button key={a.name} onClick={() => setAnimeFilter(a.name)} className={`px-2 py-1 rounded text-xs ${animeFilter === a.name ? "bg-purple-100 text-purple-700 font-medium dark:bg-purple-900/40 dark:text-purple-300" : "bg-gray-50 text-gray-500 dark:bg-zinc-800 dark:text-zinc-400"}`}>{a.name} ({a.count})</button>
-        ))}
+      {/* 필터 영역 */}
+      <div className="mb-6 rounded-2xl border border-gray-100 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          <button onClick={randomQuote} className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm flex items-center gap-1 hover:bg-purple-700 transition-colors"><Shuffle size={14} /> 랜덤 명대사</button>
+          <div className="h-6 w-px bg-gray-200 dark:bg-zinc-700 mx-1" />
+          {[{ key: "all", label: "전체" }, { key: "beginner", label: "초급" }, { key: "intermediate", label: "중급" }, { key: "advanced", label: "고급" }].map((f) => (
+            <button key={f.key} onClick={() => setDiffFilter(f.key)} className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${diffFilter === f.key ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-600"}`}>{f.label}</button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2 mb-2">
+          <Filter size={14} className="text-gray-400 dark:text-zinc-500" />
+          <span className="text-xs font-medium text-gray-500 dark:text-zinc-400">작품별 필터</span>
+          {animeFilter !== "all" && (
+            <button onClick={() => setAnimeFilter("all")} className="text-xs text-purple-500 hover:text-purple-700 dark:hover:text-purple-300 ml-auto">초기화</button>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          <button onClick={() => setAnimeFilter("all")} className={`px-2.5 py-1 rounded-full text-xs transition-colors ${animeFilter === "all" ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-600"}`}>전체</button>
+          {(showAllAnime ? animeList : animeList.slice(0, 8)).map((a) => (
+            <button key={a.name} onClick={() => setAnimeFilter(a.name)} className={`px-2.5 py-1 rounded-full text-xs transition-colors ${animeFilter === a.name ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-600"}`}>{a.name} <span className="opacity-60">{a.count}</span></button>
+          ))}
+          {animeList.length > 8 && (
+            <button onClick={() => setShowAllAnime(!showAllAnime)} className="px-2.5 py-1 rounded-full text-xs text-purple-500 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/30 dark:text-purple-300 dark:hover:bg-purple-900/50 flex items-center gap-0.5 transition-colors">
+              {showAllAnime ? "접기" : `+${animeList.length - 8}개 더보기`}
+              {showAllAnime ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="space-y-3">

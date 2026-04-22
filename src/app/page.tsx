@@ -64,21 +64,21 @@ const features = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-900">
+    <div className="min-h-screen bg-white dark:bg-[#1a0f1a]">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         {/* Soft gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-pink-50/80 via-white to-white dark:from-pink-950/30 dark:via-zinc-900 dark:to-zinc-900" />
+        <div className="absolute inset-0 bg-gradient-to-b from-pink-50/80 via-white to-white dark:from-fuchsia-950/40 dark:via-[#1a0f1a] dark:to-[#1a0f1a]" />
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-pink-100/50 blur-3xl" />
-          <div className="absolute top-20 -left-20 h-72 w-72 rounded-full bg-violet-100/30 blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 h-60 w-60 rounded-full bg-amber-50/40 blur-3xl" />
+          <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-pink-100/50 dark:bg-fuchsia-900/25 blur-3xl" />
+          <div className="absolute top-20 -left-20 h-72 w-72 rounded-full bg-violet-100/30 dark:bg-purple-800/20 blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 h-60 w-60 rounded-full bg-amber-50/40 dark:bg-rose-900/20 blur-3xl" />
         </div>
 
         <div className="relative mx-auto max-w-5xl px-4 pb-16 pt-20 sm:px-6 sm:pt-28 lg:px-8 lg:pt-36">
           <div className="flex flex-col items-center text-center">
             {/* Badge */}
-            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white px-4 py-1.5 text-sm font-medium text-pink-500 shadow-sm dark:bg-zinc-800 dark:border-pink-800">
+            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white px-4 py-1.5 text-sm font-medium text-pink-500 shadow-sm dark:bg-[#241525] dark:border-fuchsia-700">
               <Sparkles size={14} />
               <span>일본어 학습 플랫폼</span>
             </div>
@@ -110,14 +110,14 @@ export default function Home() {
               </Link>
               <Link
                 href="/kana/hiragana"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-8 py-3.5 text-base font-semibold text-gray-600 shadow-sm transition-all hover:border-pink-200 hover:text-pink-500 hover:shadow-md active:scale-[0.98] dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-pink-700 dark:hover:text-pink-400"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-8 py-3.5 text-base font-semibold text-gray-600 shadow-sm transition-all hover:border-pink-200 hover:text-pink-500 hover:shadow-md active:scale-[0.98] dark:bg-[#241525] dark:border-fuchsia-900/40 dark:text-zinc-300 dark:hover:border-fuchsia-700 dark:hover:text-pink-400"
               >
                 히라가나 둘러보기
               </Link>
             </div>
 
             {/* Decorative Japanese text */}
-            <div className="mt-20 select-none text-6xl font-extralight tracking-[0.3em] text-pink-100 dark:text-pink-900/50 sm:text-8xl lg:text-9xl">
+            <div className="mt-20 select-none text-6xl font-extralight tracking-[0.3em] text-pink-100 dark:text-fuchsia-900/50 sm:text-8xl lg:text-9xl">
               きょうま
             </div>
           </div>
@@ -141,7 +141,7 @@ export default function Home() {
               <Link
                 key={title}
                 href={href}
-                className="group rounded-2xl border border-gray-100 bg-white p-6 transition-all hover:border-pink-100 hover:shadow-lg hover:shadow-pink-50 dark:bg-zinc-800 dark:border-zinc-700 dark:hover:border-pink-800"
+                className="group rounded-2xl border border-gray-100 bg-white p-6 transition-all hover:border-pink-100 hover:shadow-lg hover:shadow-pink-50 dark:bg-[#241525] dark:border-fuchsia-900/30 dark:hover:border-fuchsia-700"
               >
                 <div className={`mb-4 inline-flex rounded-xl p-3 ${color}`}>
                   <Icon size={22} />
@@ -160,7 +160,7 @@ export default function Home() {
 
       {/* CTA Section */}
       <section className="mx-4 mb-16 sm:mx-6 lg:mx-auto lg:max-w-5xl">
-        <div className="rounded-3xl bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30 px-6 py-14 text-center sm:px-12">
+        <div className="rounded-3xl bg-gradient-to-r from-pink-50 to-rose-50 dark:from-fuchsia-950/40 dark:to-rose-950/30 px-6 py-14 text-center sm:px-12">
           <h2 className="text-2xl font-bold text-gray-700 dark:text-zinc-100 sm:text-3xl">
             지금 바로 시작하세요
           </h2>
@@ -169,7 +169,7 @@ export default function Home() {
           </p>
           <Link
             href="/dashboard"
-            className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 text-base font-semibold text-pink-500 shadow-sm transition-all hover:shadow-md active:scale-[0.98] dark:bg-zinc-800"
+            className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 text-base font-semibold text-pink-500 shadow-sm transition-all hover:shadow-md active:scale-[0.98] dark:bg-[#241525]"
           >
             대시보드로 이동
             <ArrowRight size={18} />
@@ -178,7 +178,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-100 dark:border-zinc-800 py-8">
+      <footer className="border-t border-gray-100 dark:border-fuchsia-900/30 py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <div className="flex items-baseline gap-1.5">

@@ -12,7 +12,9 @@ import {
   ArrowRight,
   Bookmark,
   Sparkles,
+  Camera,
 } from "lucide-react";
+import { useRef, useState, useCallback } from "react";
 import { useStudyStore } from "@/store/useStudyStore";
 
 const quickAccessCards = [
@@ -57,6 +59,13 @@ const quickAccessCards = [
     description: "AI와 일본어 회화",
     icon: Sparkles,
     color: "from-pink-500 to-fuchsia-400",
+  },
+  {
+    href: "/camera",
+    label: "카메라 번역",
+    description: "사진으로 일본어 번역",
+    icon: Camera,
+    color: "from-cyan-500 to-blue-400",
   },
 ];
 
@@ -237,6 +246,30 @@ export default function DashboardPage() {
     getCorrectRate,
   } = useStudyStore();
 
+  // 마우스 드래그 스크롤
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    scrollRef.current.scrollLeft = scrollLeft - (x - startX);
+  }, [isDragging, startX, scrollLeft]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
   const today = new Date().toISOString().split("T")[0];
   const displayStudyCount = todayDate === today ? todayStudyCount : 0;
 
@@ -357,29 +390,32 @@ export default function DashboardPage() {
           <h2 className="mb-5 text-xl font-bold text-foreground">
             빠른 학습
           </h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div
+            ref={scrollRef}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            className={`flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide ${isDragging ? "cursor-grabbing select-none" : "cursor-grab"}`}
+          >
             {quickAccessCards.map(
               ({ href, label, description, icon: Icon, color }) => (
                 <Link
                   key={href}
                   href={href}
-                  className="group relative overflow-hidden rounded-2xl border border-warm-200 bg-white p-6 transition-all hover:border-sakura-200 hover:shadow-lg dark:border-warm-200 dark:bg-warm-100 dark:hover:border-sakura-300"
+                  className="group flex min-w-[160px] flex-shrink-0 snap-start flex-col items-center gap-2 rounded-2xl border border-warm-200 bg-white px-5 py-4 transition-all hover:border-sakura-200 hover:shadow-lg active:scale-[0.97] dark:border-warm-200 dark:bg-warm-100 dark:hover:border-sakura-300"
                 >
                   <div
-                    className={`mb-4 inline-flex rounded-xl bg-gradient-to-br ${color} p-3 text-white shadow-lg`}
+                    className={`inline-flex rounded-xl bg-gradient-to-br ${color} p-3 text-white shadow-lg`}
                   >
                     <Icon size={22} />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground">
+                  <h3 className="text-sm font-semibold text-foreground whitespace-nowrap">
                     {label}
                   </h3>
-                  <p className="mt-1 text-sm text-accent-indigo dark:text-warm-400">
+                  <p className="text-xs text-accent-indigo dark:text-warm-400 whitespace-nowrap">
                     {description}
                   </p>
-                  <div className="mt-4 flex items-center gap-1 text-sm font-medium text-sakura-500 transition-transform group-hover:translate-x-1">
-                    학습하기
-                    <ArrowRight size={14} />
-                  </div>
                 </Link>
               )
             )}

@@ -1,8 +1,8 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useMemo } from "react";
 import Link from "next/link";
-import { ArrowLeft, ChevronDown, ChevronUp, Volume2, BookOpen, Bookmark } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, Volume2, BookOpen, Bookmark, Filter } from "lucide-react";
 import { speakJapanese } from "@/lib/tts";
 import { grammarPoints } from "@/data/grammar";
 import { useStudyStore } from "@/store/useStudyStore";
@@ -13,9 +13,21 @@ export default function GrammarLevelPage({ params }: { params: Promise<{ level: 
   const [selectedTag, setSelectedTag] = useState<string>("전체");
   const { toggleBookmark, isBookmarked } = useStudyStore();
 
+  const [showAllTags, setShowAllTags] = useState(false);
+
   const grammarList = grammarPoints.filter((g) => g.jlptLevel === level);
 
-  const allTags = ["전체", ...Array.from(new Set(grammarList.flatMap((g) => g.tags)))];
+  const sortedTags = useMemo(() => {
+    const tagCounts: Record<string, number> = {};
+    grammarList.forEach((g) => g.tags.forEach((t) => {
+      tagCounts[t] = (tagCounts[t] || 0) + 1;
+    }));
+    return Object.entries(tagCounts)
+      .sort(([, a], [, b]) => b - a)
+      .map(([tag, count]) => ({ tag, count }));
+  }, [grammarList]);
+
+  const visibleTags = showAllTags ? sortedTags : sortedTags.slice(0, 10);
   const filteredGrammar = selectedTag === "전체"
     ? grammarList
     : grammarList.filter((g) => g.tags.includes(selectedTag));
@@ -39,20 +51,48 @@ export default function GrammarLevelPage({ params }: { params: Promise<{ level: 
         </Link>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-6">
-        {allTags.map((tag) => (
+      <div className="mb-6 rounded-2xl border border-gray-100 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
+        <div className="flex items-center gap-2 mb-3">
+          <Filter size={14} className="text-violet-500" />
+          <span className="text-xs font-medium text-gray-500 dark:text-zinc-400">태그 필터</span>
+          {selectedTag !== "전체" && (
+            <button onClick={() => setSelectedTag("전체")} className="text-xs text-violet-500 hover:text-violet-700 dark:hover:text-violet-300 ml-auto">초기화</button>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-1.5">
           <button
-            key={tag}
-            onClick={() => setSelectedTag(tag)}
-            className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-              selectedTag === tag
+            onClick={() => setSelectedTag("전체")}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              selectedTag === "전체"
                 ? "bg-violet-600 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+                : "bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-600"
             }`}
           >
-            {tag}
+            전체
           </button>
-        ))}
+          {visibleTags.map(({ tag, count }) => (
+            <button
+              key={tag}
+              onClick={() => setSelectedTag(tag)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                selectedTag === tag
+                  ? "bg-violet-600 text-white"
+                  : "bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-600"
+              }`}
+            >
+              {tag} <span className="opacity-60">{count}</span>
+            </button>
+          ))}
+          {sortedTags.length > 10 && (
+            <button
+              onClick={() => setShowAllTags(!showAllTags)}
+              className="px-3 py-1.5 rounded-full text-xs text-violet-500 bg-violet-50 hover:bg-violet-100 dark:bg-violet-900/30 dark:text-violet-300 dark:hover:bg-violet-900/50 flex items-center gap-0.5 transition-colors"
+            >
+              {showAllTags ? "접기" : `+${sortedTags.length - 10}개 더보기`}
+              {showAllTags ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="space-y-3">
