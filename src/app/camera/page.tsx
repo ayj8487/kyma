@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Camera, CameraOff, Aperture, RotateCcw, Search, Volume2, ImageIcon, Loader2, Bookmark, Edit3, Trash2, Clock, ZoomIn, ZoomOut, SlidersHorizontal } from "lucide-react";
+import { Camera, CameraOff, Aperture, RotateCcw, Search, Volume2, ImageIcon, Loader2, Bookmark, Edit3, Trash2, Clock, ZoomIn, ZoomOut, SlidersHorizontal, Languages } from "lucide-react";
 import { n5Words } from "@/data/words";
 import { n4Words } from "@/data/words-n4";
 import { n3Words } from "@/data/words-n3";
+import { n2Words } from "@/data/words-n2";
 import { speakJapanese } from "@/lib/tts";
 import { useStudyStore } from "@/store/useStudyStore";
 
@@ -12,6 +13,7 @@ const allWords = [
   ...n5Words.map((w) => ({ ...w, level: "N5" })),
   ...n4Words.map((w) => ({ ...w, level: "N4" })),
   ...n3Words.map((w) => ({ ...w, level: "N3" })),
+  ...n2Words.map((w) => ({ ...w, level: "N2" })),
 ];
 
 // Extract individual Japanese tokens from OCR text
@@ -85,6 +87,8 @@ export default function CameraPage() {
   const [preprocess, setPreprocess] = useState(true);
   const [showPreprocessOption, setShowPreprocessOption] = useState(false);
   const [zoom, setZoom] = useState(1);
+  const [aiTranslation, setAiTranslation] = useState<string | null>(null);
+  const [translating, setTranslating] = useState(false);
   const { bookmarks, toggleBookmark } = useStudyStore();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -388,6 +392,24 @@ export default function CameraPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const handleAiTranslate = async (text: string) => {
+    if (translating) return;
+    setTranslating(true);
+    try {
+      const res = await fetch("/api/ai/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      const data = await res.json();
+      setAiTranslation(data.translation || "번역 결과를 가져오지 못했습니다.");
+    } catch {
+      setAiTranslation("번역에 실패했습니다.");
+    } finally {
+      setTranslating(false);
+    }
+  };
+
   const resetCapture = () => {
     setCapturedImage(null);
     setResults([]);
@@ -396,6 +418,7 @@ export default function CameraPage() {
     setEditingOcr(false);
     setOcrProgress(0);
     setOcrStatus("");
+    setAiTranslation(null);
   };
 
   const handleSearch = () => {
@@ -500,6 +523,25 @@ export default function CameraPage() {
                   />
                 ) : (
                   <p className="text-lg font-bold text-gray-900 dark:text-white break-words leading-relaxed">{ocrText}</p>
+                )}
+                {!editingOcr && ocrText && (
+                  <button
+                    onClick={() => handleAiTranslate(ocrText)}
+                    disabled={translating}
+                    className="mt-2 text-xs text-violet-600 dark:text-violet-400 hover:text-violet-800 flex items-center gap-1 disabled:opacity-50"
+                  >
+                    {translating ? <Loader2 size={12} className="animate-spin" /> : <Languages size={12} />}
+                    {translating ? "번역 중..." : "AI 전체 번역"}
+                  </button>
+                )}
+                {aiTranslation && !editingOcr && (
+                  <div className="mt-2 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-700 rounded-lg px-3 py-2">
+                    <p className="text-xs text-violet-500 dark:text-violet-400 font-medium mb-0.5 flex items-center justify-between">
+                      AI 번역
+                      <button onClick={() => setAiTranslation(null)} className="text-gray-400 hover:text-gray-600">✕</button>
+                    </p>
+                    <p className="text-sm text-violet-900 dark:text-violet-200">{aiTranslation}</p>
+                  </div>
                 )}
               </div>
             )}

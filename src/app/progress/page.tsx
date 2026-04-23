@@ -5,6 +5,11 @@ import Link from "next/link";
 import { useStudyStore } from "@/store/useStudyStore";
 import { hiraganaData, katakanaData } from "@/data/kana";
 import { n5Words } from "@/data/words";
+import { n4Words } from "@/data/words-n4";
+import { n3Words } from "@/data/words-n3";
+import { n2Words } from "@/data/words-n2";
+import { grammarPoints } from "@/data/grammar";
+import { animeQuotes } from "@/data/anime-quotes";
 import {
   BarChart,
   Bar,
@@ -22,6 +27,7 @@ import {
   Star,
   TrendingUp,
   RotateCcw,
+  Bookmark,
 } from "lucide-react";
 
 export default function ProgressPage() {
@@ -33,19 +39,60 @@ export default function ProgressPage() {
   const totalPoints = useStudyStore((s) => s.totalPoints);
   const getCorrectRate = useStudyStore((s) => s.getCorrectRate);
   const getMasteredCount = useStudyStore((s) => s.getMasteredCount);
-  const getLearningCount = useStudyStore((s) => s.getLearningCount);
   const resetAllProgress = useStudyStore((s) => s.resetAllProgress);
 
   const correctRate = getCorrectRate();
   const hiraganaMastered = getMasteredCount("kana");
   const katakanaMastered = getMasteredCount("katakana");
   const wordsMastered = getMasteredCount("word");
-  const wordsLearning = getLearningCount("word");
+  const bookmarkedWords = useStudyStore((s) =>
+    Object.keys(s.bookmarks).filter((k) => k.startsWith("word:")).length
+  );
+  const bookmarkedGrammar = useStudyStore((s) =>
+    Object.keys(s.bookmarks).filter((k) => k.startsWith("grammar:")).length
+  );
+  const bookmarkedAnime = useStudyStore((s) =>
+    Object.keys(s.bookmarks).filter((k) => k.startsWith("anime:")).length
+  );
 
   const totalHiragana = hiraganaData.length;
   const totalKatakana = katakanaData.length;
-  const totalKana = totalHiragana + totalKatakana;
-  const totalWords = n5Words.length;
+  const totalN5 = n5Words.length;
+  const totalN4 = n4Words.length;
+  const totalN3 = n3Words.length;
+  const totalN2 = n2Words.length;
+  const totalAllWords = totalN5 + totalN4 + totalN3 + totalN2;
+  void grammarPoints; // available for future grammar progress
+  void animeQuotes;  // available for future anime progress
+
+  // Per-level word mastery (we use word IDs to determine level)
+  const n5MasteredCount = useMemo(() => {
+    const n5Ids = new Set(n5Words.map((w) => w.id));
+    return Object.values(progress).filter(
+      (p) => p.contentType === "word" && n5Ids.has(p.contentId) && p.status === "mastered"
+    ).length;
+  }, [progress]);
+
+  const n4MasteredCount = useMemo(() => {
+    const n4Ids = new Set(n4Words.map((w) => w.id));
+    return Object.values(progress).filter(
+      (p) => p.contentType === "word" && n4Ids.has(p.contentId) && p.status === "mastered"
+    ).length;
+  }, [progress]);
+
+  const n3MasteredCount = useMemo(() => {
+    const n3Ids = new Set(n3Words.map((w) => w.id));
+    return Object.values(progress).filter(
+      (p) => p.contentType === "word" && n3Ids.has(p.contentId) && p.status === "mastered"
+    ).length;
+  }, [progress]);
+
+  const n2MasteredCount = useMemo(() => {
+    const n2Ids = new Set(n2Words.map((w) => w.id));
+    return Object.values(progress).filter(
+      (p) => p.contentType === "word" && n2Ids.has(p.contentId) && p.status === "mastered"
+    ).length;
+  }, [progress]);
 
   const kanaLearned = useMemo(() => {
     return Object.values(progress).filter(
@@ -171,67 +218,85 @@ export default function ProgressPage() {
           </div>
         </div>
 
-        {/* Mastery progress */}
-        <div className="mb-8 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-800">
+        {/* Mastery progress - Kana */}
+        <div className="mb-4 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-800">
           <h2 className="mb-5 flex items-center gap-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-            <TrendingUp className="h-5 w-5 text-indigo-500" />
-            마스터 진행도
+            <Languages className="h-5 w-5 text-violet-500" />
+            가나 진행도
           </h2>
-
-          {/* Hiragana */}
           <div className="mb-4">
             <div className="mb-1.5 flex items-center justify-between text-sm">
-              <span className="font-medium text-zinc-700 dark:text-zinc-300">
-                히라가나
-              </span>
-              <span className="text-zinc-500 dark:text-zinc-400">
-                {hiraganaMastered} / {totalHiragana}
-              </span>
+              <span className="font-medium text-zinc-700 dark:text-zinc-300">히라가나</span>
+              <span className="text-zinc-500 dark:text-zinc-400">{hiraganaMastered} / {totalHiragana}</span>
             </div>
-            <div className="h-3 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-700">
-              <div
-                className="h-full rounded-full bg-violet-500 transition-all duration-500"
-                style={{ width: `${hiraganaPercent}%` }}
-              />
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-700">
+              <div className="h-full rounded-full bg-violet-500 transition-all duration-500" style={{ width: `${hiraganaPercent}%` }} />
             </div>
           </div>
-
-          {/* Katakana */}
-          <div className="mb-4">
-            <div className="mb-1.5 flex items-center justify-between text-sm">
-              <span className="font-medium text-zinc-700 dark:text-zinc-300">
-                카타카나
-              </span>
-              <span className="text-zinc-500 dark:text-zinc-400">
-                {katakanaMastered} / {totalKatakana}
-              </span>
-            </div>
-            <div className="h-3 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-700">
-              <div
-                className="h-full rounded-full bg-pink-500 transition-all duration-500"
-                style={{ width: `${katakanaPercent}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Words */}
           <div>
             <div className="mb-1.5 flex items-center justify-between text-sm">
-              <span className="font-medium text-zinc-700 dark:text-zinc-300">
-                N5 단어
-              </span>
-              <span className="text-zinc-500 dark:text-zinc-400">
-                {wordsMastered} / {totalWords}
-              </span>
+              <span className="font-medium text-zinc-700 dark:text-zinc-300">카타카나</span>
+              <span className="text-zinc-500 dark:text-zinc-400">{katakanaMastered} / {totalKatakana}</span>
             </div>
-            <div className="h-3 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-700">
-              <div
-                className="h-full rounded-full bg-indigo-500 transition-all duration-500"
-                style={{
-                  width: `${totalWords > 0 ? Math.round((wordsMastered / totalWords) * 100) : 0}%`,
-                }}
-              />
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-700">
+              <div className="h-full rounded-full bg-pink-500 transition-all duration-500" style={{ width: `${katakanaPercent}%` }} />
             </div>
+          </div>
+        </div>
+
+        {/* Mastery progress - Words */}
+        <div className="mb-4 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-800">
+          <h2 className="mb-5 flex items-center gap-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+            <BookOpen className="h-5 w-5 text-indigo-500" />
+            단어 마스터 진행도
+            <span className="ml-auto text-sm font-normal text-zinc-400">{wordsMastered} / {totalAllWords}</span>
+          </h2>
+          {[
+            { label: "N5", mastered: n5MasteredCount, total: totalN5, color: "bg-emerald-500" },
+            { label: "N4", mastered: n4MasteredCount, total: totalN4, color: "bg-blue-500" },
+            { label: "N3", mastered: n3MasteredCount, total: totalN3, color: "bg-indigo-500" },
+            { label: "N2", mastered: n2MasteredCount, total: totalN2, color: "bg-violet-500" },
+          ].map(({ label, mastered, total, color }) => {
+            const pct = total > 0 ? Math.round((mastered / total) * 100) : 0;
+            return (
+              <div key={label} className="mb-4 last:mb-0">
+                <div className="mb-1.5 flex items-center justify-between text-sm">
+                  <span className="font-medium text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
+                    <span className={`inline-block w-2 h-2 rounded-full ${color}`} />
+                    {label}
+                  </span>
+                  <span className="text-zinc-500 dark:text-zinc-400">{mastered} / {total} <span className="text-xs opacity-60">({pct}%)</span></span>
+                </div>
+                <div className="h-2.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-700">
+                  <div className={`h-full rounded-full ${color} transition-all duration-500`} style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Bookmarks summary */}
+        <div className="mb-8 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-800">
+          <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+            <Bookmark className="h-5 w-5 text-yellow-500" />
+            단어장 저장 현황
+          </h2>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="rounded-lg bg-zinc-50 dark:bg-zinc-900 p-4 text-center">
+              <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{bookmarkedWords}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">저장된 단어</p>
+            </div>
+            <div className="rounded-lg bg-zinc-50 dark:bg-zinc-900 p-4 text-center">
+              <p className="text-2xl font-bold text-violet-600 dark:text-violet-400">{bookmarkedGrammar}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">저장된 문법</p>
+            </div>
+            <div className="rounded-lg bg-zinc-50 dark:bg-zinc-900 p-4 text-center">
+              <p className="text-2xl font-bold text-pink-600 dark:text-pink-400">{bookmarkedAnime}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">저장된 대사</p>
+            </div>
+          </div>
+          <div className="mt-3 flex gap-2 justify-center">
+            <Link href="/bookmarks" className="text-xs text-indigo-500 hover:text-indigo-700 dark:text-indigo-400">단어장 바로가기 →</Link>
           </div>
         </div>
 
