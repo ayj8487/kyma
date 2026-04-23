@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { Newspaper, Volume2, Eye, EyeOff, BookOpen, Loader2, WifiOff, RefreshCw, ExternalLink, Clock } from "lucide-react";
+import { Newspaper, Volume2, Eye, EyeOff, BookOpen, Loader2, WifiOff, RefreshCw, ExternalLink, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { newsArticles, NewsArticle } from "@/data/news";
 import { speakJapanese } from "@/lib/tts";
 import { n5Words } from "@/data/words";
@@ -62,6 +62,11 @@ export default function NewsPage() {
   const [translating, setTranslating] = useState(false);
   const [showSummaryKo, setShowSummaryKo] = useState(false);
   const [summaryTranslation, setSummaryTranslation] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const PAGE_SIZE = 10;
+  const totalPages = Math.ceil(liveArticles.length / PAGE_SIZE);
+  const pagedArticles = liveArticles.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   // Saved state
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -73,6 +78,7 @@ export default function NewsPage() {
     setLiveError(false);
     setSelectedLive(null);
     setAiTranslation(null);
+    setCurrentPage(1);
     try {
       const res = await fetch(`/api/news?category=${encodeURIComponent(cat)}`);
       if (!res.ok) throw new Error(`${res.status}`);
@@ -292,26 +298,94 @@ export default function NewsPage() {
                   </button>
                 </div>
               ) : (
-                <div className="grid gap-3">
-                  {liveArticles.map((article) => (
-                    <button
-                      key={article.id}
-                      onClick={() => { setSelectedLive(article); setAiTranslation(null); setShowSummaryKo(false); setSummaryTranslation(null); }}
-                      className="bg-white border rounded-xl p-5 text-left hover:shadow-md hover:border-indigo-200 transition-all dark:bg-zinc-800 dark:border-zinc-700 dark:hover:border-indigo-500"
-                    >
-                      <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <span className="px-2 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 text-xs rounded-full font-bold">NHK</span>
-                        <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 text-xs rounded-full">{article.category}</span>
-                        {article.isNew && <span className="px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">NEW</span>}
-                        <span className="text-xs text-gray-400 dark:text-zinc-500 ml-auto flex items-center gap-1">
-                          <Clock size={11} /> {article.time || article.date}
-                        </span>
-                      </div>
-                      <h3 className="text-base font-bold mb-1 dark:text-zinc-100 leading-snug">{article.title}</h3>
-                      <p className="text-sm text-gray-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">{article.summary}</p>
-                    </button>
-                  ))}
-                </div>
+                <>
+                  {/* 건수 안내 */}
+                  <p className="text-xs text-gray-400 dark:text-zinc-500 mb-3">
+                    전체 {liveArticles.length}건 · {currentPage}/{totalPages} 페이지
+                  </p>
+
+                  <div className="grid gap-3 mb-5">
+                    {pagedArticles.map((article) => (
+                      <button
+                        key={article.id}
+                        onClick={() => { setSelectedLive(article); setAiTranslation(null); setShowSummaryKo(false); setSummaryTranslation(null); }}
+                        className="bg-white border rounded-xl p-5 text-left hover:shadow-md hover:border-indigo-200 transition-all dark:bg-zinc-800 dark:border-zinc-700 dark:hover:border-indigo-500"
+                      >
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <span className="px-2 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 text-xs rounded-full font-bold">NHK</span>
+                          <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 text-xs rounded-full">{article.category}</span>
+                          {article.isNew && <span className="px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">NEW</span>}
+                          <span className="text-xs text-gray-400 dark:text-zinc-500 ml-auto flex items-center gap-1">
+                            <Clock size={11} /> {article.time || article.date}
+                          </span>
+                        </div>
+                        <h3 className="text-base font-bold mb-1 dark:text-zinc-100 leading-snug">{article.title}</h3>
+                        <p className="text-sm text-gray-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">{article.summary}</p>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* 페이징 */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-1">
+                      <button
+                        onClick={() => { setCurrentPage(1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                        disabled={currentPage === 1}
+                        className="px-2 py-1.5 rounded-lg text-sm text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        «
+                      </button>
+                      <button
+                        onClick={() => { setCurrentPage((p) => p - 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                        disabled={currentPage === 1}
+                        className="p-1.5 rounded-lg text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+
+                      {/* 페이지 번호 */}
+                      {Array.from({ length: totalPages }, (_, i) => i + 1)
+                        .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+                        .reduce<(number | "...")[]>((acc, p, idx, arr) => {
+                          if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push("...");
+                          acc.push(p);
+                          return acc;
+                        }, [])
+                        .map((item, idx) =>
+                          item === "..." ? (
+                            <span key={`ellipsis-${idx}`} className="px-1 text-gray-400 dark:text-zinc-500 text-sm">…</span>
+                          ) : (
+                            <button
+                              key={item}
+                              onClick={() => { setCurrentPage(item as number); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                              className={`min-w-[32px] h-8 rounded-lg text-sm font-medium transition-colors ${
+                                currentPage === item
+                                  ? "bg-indigo-600 text-white"
+                                  : "text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700"
+                              }`}
+                            >
+                              {item}
+                            </button>
+                          )
+                        )}
+
+                      <button
+                        onClick={() => { setCurrentPage((p) => p + 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                        disabled={currentPage === totalPages}
+                        className="p-1.5 rounded-lg text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        <ChevronRight size={16} />
+                      </button>
+                      <button
+                        onClick={() => { setCurrentPage(totalPages); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                        disabled={currentPage === totalPages}
+                        className="px-2 py-1.5 rounded-lg text-sm text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        »
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}
