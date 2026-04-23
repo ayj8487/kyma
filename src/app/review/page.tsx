@@ -21,11 +21,12 @@ import { n5Words } from "@/data/words";
 import { n4Words } from "@/data/words-n4";
 import { n3Words } from "@/data/words-n3";
 import { n2Words } from "@/data/words-n2";
+import { n1Words } from "@/data/words-n1";
 import { grammarPoints } from "@/data/grammar";
 
 type TabType = "today" | "wrong" | "all";
 
-const allWords = [...n5Words, ...n4Words, ...n3Words, ...n2Words];
+const allWords = [...n5Words, ...n4Words, ...n3Words, ...n2Words, ...n1Words];
 
 function getContentInfo(contentType: string, contentId: string) {
   if (contentType === "hiragana") {

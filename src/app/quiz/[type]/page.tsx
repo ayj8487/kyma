@@ -7,6 +7,7 @@ import { n5Words } from "@/data/words";
 import { n4Words } from "@/data/words-n4";
 import { n3Words } from "@/data/words-n3";
 import { n2Words } from "@/data/words-n2";
+import { n1Words } from "@/data/words-n1";
 import { grammarPoints } from "@/data/grammar";
 import { useStudyStore } from "@/store/useStudyStore";
 import {
@@ -36,6 +37,7 @@ const wordsByLevel: Record<string, typeof n5Words> = {
   N4: n4Words,
   N3: n3Words,
   N2: n2Words,
+  N1: n1Words,
 };
 
 function shuffleArray<T>(arr: T[]): T[] {
@@ -113,7 +115,7 @@ function generateGrammarQuestions(level: string): Question[] {
   });
 }
 
-const levelOptions = ["N5", "N4", "N3", "N2"];
+const levelOptions = ["N5", "N4", "N3", "N2", "N1"];
 
 export default function QuizTypePage({
   params,
@@ -311,7 +313,7 @@ export default function QuizTypePage({
           <button
             onClick={() => {
               if (type === "word") {
-                const allWords = [...n5Words, ...n4Words, ...n3Words, ...n2Words];
+                const allWords = [...n5Words, ...n4Words, ...n3Words, ...n2Words, ...n1Words];
                 const words = shuffleArray(allWords).slice(0, 10);
                 const qs = words.map((w, idx) => {
                   const wrongOptions = shuffleArray(

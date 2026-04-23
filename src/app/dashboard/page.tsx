@@ -13,6 +13,7 @@ import {
   Bookmark,
   Sparkles,
   Camera,
+  Bell,
 } from "lucide-react";
 import { useRef, useState, useCallback } from "react";
 import { useStudyStore } from "@/store/useStudyStore";
@@ -244,7 +245,10 @@ export default function DashboardPage() {
     todayStudyCount,
     todayDate,
     getCorrectRate,
+    getDueItems,
   } = useStudyStore();
+
+  const dueItems = getDueItems();
 
   // 마우스 드래그 스크롤
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -338,6 +342,27 @@ export default function DashboardPage() {
             </div>
           );
         })()}
+
+        {/* SRS 복습 알림 */}
+        {dueItems.length > 0 && (
+          <Link
+            href="/review"
+            className="mb-6 flex items-center gap-3 rounded-2xl border border-amber-300 bg-amber-50 px-5 py-4 transition-all hover:border-amber-400 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950/40 dark:hover:bg-amber-950/60"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/50">
+              <Bell size={20} className="text-amber-600 dark:text-amber-400" />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-amber-800 dark:text-amber-300">
+                복습할 항목이 {dueItems.length}개 있습니다!
+              </p>
+              <p className="text-sm text-amber-600 dark:text-amber-400">
+                SRS 복습을 통해 기억을 강화하세요
+              </p>
+            </div>
+            <ArrowRight size={18} className="shrink-0 text-amber-500 dark:text-amber-400" />
+          </Link>
+        )}
 
         {/* Today's Study Count */}
         <div className="mb-8 flex items-center gap-3 rounded-2xl border border-sakura-200 bg-gradient-to-r from-sakura-50 to-warm-50 p-4 dark:border-sakura-300 dark:from-sakura-100 dark:to-warm-100 sm:p-5">

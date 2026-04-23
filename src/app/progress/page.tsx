@@ -8,6 +8,7 @@ import { n5Words } from "@/data/words";
 import { n4Words } from "@/data/words-n4";
 import { n3Words } from "@/data/words-n3";
 import { n2Words } from "@/data/words-n2";
+import { n1Words } from "@/data/words-n1";
 import { grammarPoints } from "@/data/grammar";
 import { animeQuotes } from "@/data/anime-quotes";
 import {
@@ -28,6 +29,8 @@ import {
   TrendingUp,
   RotateCcw,
   Bookmark,
+  AlertTriangle,
+  PieChart,
 } from "lucide-react";
 
 export default function ProgressPage() {
@@ -39,6 +42,7 @@ export default function ProgressPage() {
   const totalPoints = useStudyStore((s) => s.totalPoints);
   const getCorrectRate = useStudyStore((s) => s.getCorrectRate);
   const getMasteredCount = useStudyStore((s) => s.getMasteredCount);
+  const getWrongItems = useStudyStore((s) => s.getWrongItems);
   const resetAllProgress = useStudyStore((s) => s.resetAllProgress);
 
   const correctRate = getCorrectRate();
@@ -61,7 +65,8 @@ export default function ProgressPage() {
   const totalN4 = n4Words.length;
   const totalN3 = n3Words.length;
   const totalN2 = n2Words.length;
-  const totalAllWords = totalN5 + totalN4 + totalN3 + totalN2;
+  const totalN1 = n1Words.length;
+  const totalAllWords = totalN5 + totalN4 + totalN3 + totalN2 + totalN1;
   void grammarPoints; // available for future grammar progress
   void animeQuotes;  // available for future anime progress
 
@@ -93,6 +98,41 @@ export default function ProgressPage() {
       (p) => p.contentType === "word" && n2Ids.has(p.contentId) && p.status === "mastered"
     ).length;
   }, [progress]);
+
+  const n1MasteredCount = useMemo(() => {
+    const n1Ids = new Set(n1Words.map((w) => w.id));
+    return Object.values(progress).filter(
+      (p) => p.contentType === "word" && n1Ids.has(p.contentId) && p.status === "mastered"
+    ).length;
+  }, [progress]);
+
+  // Wrong items for weak area analysis
+  const wrongItems = useMemo(() => getWrongItems(), [getWrongItems, progress]);
+
+  // Quiz type breakdown
+  const quizTypeBreakdown = useMemo(() => {
+    const types: Record<string, { correct: number; total: number }> = {};
+    for (const q of quizHistory) {
+      if (!types[q.type]) types[q.type] = { correct: 0, total: 0 };
+      types[q.type].correct += q.correctAnswers;
+      types[q.type].total += q.totalQuestions;
+    }
+    return Object.entries(types).map(([type, { correct, total }]) => ({
+      type,
+      correct,
+      total,
+      rate: total > 0 ? Math.round((correct / total) * 100) : 0,
+    })).sort((a, b) => a.rate - b.rate);
+  }, [quizHistory]);
+
+  // Weak words lookup
+  const allWordsMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const w of [...n5Words, ...n4Words, ...n3Words, ...n2Words, ...n1Words]) {
+      map[w.id] = `${w.word} (${w.meaning})`;
+    }
+    return map;
+  }, []);
 
   const kanaLearned = useMemo(() => {
     return Object.values(progress).filter(
@@ -256,6 +296,7 @@ export default function ProgressPage() {
             { label: "N4", mastered: n4MasteredCount, total: totalN4, color: "bg-blue-500" },
             { label: "N3", mastered: n3MasteredCount, total: totalN3, color: "bg-indigo-500" },
             { label: "N2", mastered: n2MasteredCount, total: totalN2, color: "bg-violet-500" },
+            { label: "N1", mastered: n1MasteredCount, total: totalN1, color: "bg-red-500" },
           ].map(({ label, mastered, total, color }) => {
             const pct = total > 0 ? Math.round((mastered / total) * 100) : 0;
             return (
@@ -339,6 +380,114 @@ export default function ProgressPage() {
             </ResponsiveContainer>
           </div>
         </div>
+
+        {/* Quiz type breakdown */}
+        {quizTypeBreakdown.length > 0 && (
+          <div className="mb-4 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-800">
+            <h2 className="mb-5 flex items-center gap-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+              <PieChart className="h-5 w-5 text-indigo-500" />
+              퀴즈 유형별 분석
+            </h2>
+            <div className="space-y-3">
+              {quizTypeBreakdown.map(({ type, correct, total, rate }) => (
+                <div key={type}>
+                  <div className="mb-1.5 flex items-center justify-between text-sm">
+                    <span className="font-medium text-zinc-700 dark:text-zinc-300">
+                      {type} 퀴즈
+                    </span>
+                    <span className="text-zinc-500 dark:text-zinc-400">
+                      {correct}/{total}문제{" "}
+                      <span
+                        className={`font-semibold ${
+                          rate >= 80
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : rate >= 50
+                              ? "text-amber-600 dark:text-amber-400"
+                              : "text-red-600 dark:text-red-400"
+                        }`}
+                      >
+                        ({rate}%)
+                      </span>
+                    </span>
+                  </div>
+                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-700">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        rate >= 80
+                          ? "bg-emerald-500"
+                          : rate >= 50
+                            ? "bg-amber-500"
+                            : "bg-red-500"
+                      }`}
+                      style={{ width: `${rate}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Weak area analysis */}
+        {wrongItems.length > 0 && (
+          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-6 dark:border-amber-800 dark:bg-amber-950/30">
+            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-amber-800 dark:text-amber-300">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              취약 단어 분석
+              <span className="ml-auto text-sm font-normal text-amber-600 dark:text-amber-400">
+                {wrongItems.length}개
+              </span>
+            </h2>
+            <p className="mb-4 text-sm text-amber-700 dark:text-amber-400">
+              오답이 정답보다 많은 단어들입니다. 집중적으로 복습하세요.
+            </p>
+            <div className="space-y-2">
+              {wrongItems.slice(0, 10).map((item) => {
+                const wordLabel = item.contentType === "word"
+                  ? (allWordsMap[item.contentId] ?? item.contentId)
+                  : item.contentId;
+                const total = item.correctCount + item.incorrectCount;
+                const wrongRate = total > 0 ? Math.round((item.incorrectCount / total) * 100) : 0;
+                return (
+                  <div
+                    key={item.contentId}
+                    className="flex items-center justify-between rounded-lg bg-white px-4 py-2.5 dark:bg-zinc-800"
+                  >
+                    <div>
+                      <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+                        {wordLabel}
+                      </p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                        {item.contentType}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-red-500">
+                        오답률 {wrongRate}%
+                      </p>
+                      <p className="text-xs text-zinc-400">
+                        정답 {item.correctCount} / 오답 {item.incorrectCount}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {wrongItems.length > 10 && (
+              <p className="mt-3 text-center text-xs text-amber-600 dark:text-amber-400">
+                외 {wrongItems.length - 10}개 항목
+              </p>
+            )}
+            <div className="mt-4 text-center">
+              <Link
+                href="/review"
+                className="inline-block rounded-lg bg-amber-500 px-5 py-2 text-sm font-medium text-white hover:bg-amber-600"
+              >
+                취약 단어 복습하기 →
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Quiz history */}
         <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-800">

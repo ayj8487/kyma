@@ -32,10 +32,10 @@ const levels = [
   },
   {
     level: "N1",
-    words: 2000,
+    words: 60,
     description: "상급 단계",
     detail: "폭넓은 장면에서 사용되는 일본어를 이해할 수 있는 수준",
-    available: false,
+    available: true,
   },
 ];
 

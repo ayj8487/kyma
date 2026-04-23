@@ -9,6 +9,7 @@ import { n5Words } from "@/data/words";
 import { n4Words } from "@/data/words-n4";
 import { n3Words } from "@/data/words-n3";
 import { n2Words } from "@/data/words-n2";
+import { n1Words } from "@/data/words-n1";
 import { animeQuotes } from "@/data/anime-quotes";
 import { grammarPoints } from "@/data/grammar";
 import { speakJapanese } from "@/lib/tts";
@@ -21,7 +22,7 @@ const diffMap: Record<string, { label: string; color: string }> = {
   advanced: { label: "고급", color: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300" },
 };
 
-const allWords = [...n5Words, ...n4Words, ...n3Words, ...n2Words];
+const allWords = [...n5Words, ...n4Words, ...n3Words, ...n2Words, ...n1Words];
 
 export default function BookmarksPage() {
   const { bookmarks, toggleBookmark } = useStudyStore();
