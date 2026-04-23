@@ -1,133 +1,92 @@
 import { NextRequest } from "next/server";
+import { XMLParser } from "fast-xml-parser";
 
-const NHK_EASY = "https://www3.nhk.or.jp/news/easy";
+// NHK RSS categories
+const NHK_RSS_FEEDS = [
+  { url: "https://www3.nhk.or.jp/rss/news/cat0.xml", category: "전체" },
+  { url: "https://www3.nhk.or.jp/rss/news/cat6.xml", category: "국제" },
+  { url: "https://www3.nhk.or.jp/rss/news/cat3.xml", category: "경제" },
+  { url: "https://www3.nhk.or.jp/rss/news/cat5.xml", category: "문화" },
+  { url: "https://www3.nhk.or.jp/rss/news/cat4.xml", category: "스포츠" },
+];
+
 const HEADERS = {
-  "Referer": "https://www3.nhk.or.jp/news/easy/",
-  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-  "Accept": "application/json, text/plain, */*",
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+  "Accept": "application/rss+xml, application/xml, text/xml, */*",
 };
 
-// Strip <ruby> tags: keep base text only
-function stripRuby(text: string): string {
-  return text
-    .replace(/<ruby>/g, "")
-    .replace(/<\/ruby>/g, "")
-    .replace(/<rt>.*?<\/rt>/g, "")
-    .replace(/<rp>.*?<\/rp>/g, "")
-    .replace(/<[^>]+>/g, "")
-    .trim();
+function extractNewsId(link: string): string {
+  // e.g. http://www3.nhk.or.jp/news/html/20260424/k10015106881000.html
+  const m = link.match(/\/([a-z][0-9a-z]+)\.(html|json)$/i);
+  return m ? m[1] : link;
 }
 
-// Extract reading from ruby-annotated text
-function extractReading(text: string): string {
-  const parts: string[] = [];
-  const regex = /<ruby>([^<]+)<rt>([^<]+)<\/rt><\/ruby>|([^\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf<]+)/g;
-  let match;
-  while ((match = regex.exec(text)) !== null) {
-    if (match[2]) parts.push(match[2]); // reading
-    else if (match[3]) parts.push(match[3].replace(/<[^>]+>/g, "").trim());
+function formatDate(pubDate: string): string {
+  try {
+    const d = new Date(pubDate);
+    const y = d.getFullYear();
+    const mo = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${mo}-${day}`;
+  } catch {
+    return pubDate;
   }
-  return parts.join("").trim();
 }
 
-// Map NHK category codes to Korean labels
-const CATEGORY_MAP: Record<string, string> = {
-  "00": "사회",
-  "01": "정치",
-  "02": "국제",
-  "03": "경제",
-  "04": "스포츠",
-  "05": "문화·엔터",
-  "06": "과학·기술",
-  "07": "건강",
-  "": "일반",
-};
-
-function formatDate(dateStr: string): string {
-  // NHK format: "20260424120000" or "20260424"
-  const d = dateStr.replace(/\D/g, "").slice(0, 8);
-  if (d.length < 8) return dateStr;
-  return `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}`;
+function formatTime(pubDate: string): string {
+  try {
+    const d = new Date(pubDate);
+    const h = String(d.getHours()).padStart(2, "0");
+    const m = String(d.getMinutes()).padStart(2, "0");
+    return `${h}:${m}`;
+  } catch {
+    return "";
+  }
 }
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const articleId = searchParams.get("id");
+  const category = searchParams.get("category") || "전체";
+
+  const feed = NHK_RSS_FEEDS.find((f) => f.category === category) ?? NHK_RSS_FEEDS[0];
 
   try {
-    if (articleId) {
-      // Fetch individual article
-      const res = await fetch(`${NHK_EASY}/${articleId}/${articleId}.json`, {
-        headers: HEADERS,
-        next: { revalidate: 3600 },
-      });
-
-      if (!res.ok) {
-        return Response.json({ error: "Article not found" }, { status: 404 });
-      }
-
-      const data = await res.json();
-
-      return Response.json({
-        news_id: data.news_id || articleId,
-        title: stripRuby(data.title_with_ruby || data.title || ""),
-        titleReading: extractReading(data.title_with_ruby || ""),
-        content: stripRuby(data.body_with_ruby || data.body || ""),
-        contentWithRuby: data.body_with_ruby || data.body || "",
-        date: formatDate(data.news_pub_date || data.news_prearranged_time || ""),
-        category: CATEGORY_MAP[data.top_category_id || data.category || ""] || "일반",
-        imageUrl: data.has_news_easy_image === "1"
-          ? `${NHK_EASY}/${articleId}/${articleId}.jpg`
-          : null,
-        voiceUrl: data.has_news_easy_voice === "1"
-          ? `${NHK_EASY}/${articleId}/${articleId}.mp3`
-          : null,
-      });
-    }
-
-    // Fetch article list
-    const res = await fetch(`${NHK_EASY}/top-list-default.json`, {
+    const res = await fetch(feed.url, {
       headers: HEADERS,
-      next: { revalidate: 1800 },
+      next: { revalidate: 900 }, // 15분 캐시
     });
 
     if (!res.ok) {
-      return Response.json({ error: "Failed to fetch news list", status: res.status }, { status: 502 });
+      return Response.json({ error: `RSS fetch failed: ${res.status}` }, { status: 502 });
     }
 
-    const data = await res.json();
+    const xml = await res.text();
 
-    // Handle different possible structures
-    let items: Record<string, string>[] = [];
-    if (Array.isArray(data?.channel?.item)) {
-      items = data.channel.item;
-    } else if (Array.isArray(data?.news_list?.news)) {
-      items = data.news_list.news;
-    } else if (Array.isArray(data)) {
-      items = data;
-    } else {
-      // Try to find any array in the response
-      for (const key of Object.keys(data)) {
-        if (Array.isArray(data[key])) {
-          items = data[key];
-          break;
-        }
-      }
-    }
+    const parser = new XMLParser({ ignoreAttributes: false, parseAttributeValue: true });
+    const result = parser.parse(xml);
 
-    const articles = items.slice(0, 20).map((item) => ({
-      news_id: item.news_id || item.id || "",
-      title: stripRuby(item.title_with_ruby || item.title || ""),
-      titleReading: extractReading(item.title_with_ruby || ""),
-      date: formatDate(item.news_pub_date || item.news_prearranged_time || item.outdate_tmp || ""),
-      category: CATEGORY_MAP[item.top_category_id || item.category || ""] || "일반",
-      hasImage: item.has_news_easy_image === "1",
-      hasVoice: item.has_news_easy_voice === "1",
+    const items: Record<string, string>[] = result?.rss?.channel?.item ?? [];
+    const channelTitle: string = result?.rss?.channel?.title ?? "NHKニュース";
+
+    const articles = (Array.isArray(items) ? items : [items]).map((item) => ({
+      id: extractNewsId(item.link ?? item.guid ?? ""),
+      title: item.title ?? "",
+      summary: item.description ?? "",
+      link: item.link ?? item.guid ?? "",
+      date: formatDate(item.pubDate ?? ""),
+      time: formatTime(item.pubDate ?? ""),
+      category: feed.category,
+      isNew: String(item["nhknews:new"]) === "true",
     }));
 
-    return Response.json({ articles });
+    return Response.json({
+      channelTitle,
+      category: feed.category,
+      articles,
+      fetchedAt: new Date().toISOString(),
+    });
   } catch (err) {
-    console.error("NHK news API error:", err);
+    console.error("NHK RSS error:", err);
     return Response.json({ error: "Failed to fetch news" }, { status: 500 });
   }
 }
