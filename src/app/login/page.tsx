@@ -52,18 +52,18 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-6 sm:py-12">
         <div className="w-full max-w-md">
           {/* Header */}
-          <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-foreground">로그인</h1>
-            <p className="mt-2 text-accent-indigo dark:text-warm-400">
+          <div className="mb-6 sm:mb-8 text-center">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">로그인</h1>
+            <p className="mt-2 text-sm sm:text-base text-accent-indigo dark:text-warm-400">
               Kyma에 오신 것을 환영합니다
             </p>
           </div>
 
           {/* Login Card */}
-          <div className="rounded-2xl border border-warm-200 bg-white p-8 shadow-sm dark:border-warm-200 dark:bg-warm-100">
+          <div className="rounded-2xl border border-warm-200 bg-white p-5 sm:p-8 shadow-sm dark:border-warm-200 dark:bg-warm-100">
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Email */}
               <div>

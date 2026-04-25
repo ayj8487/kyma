@@ -313,14 +313,43 @@ export function Navbar() {
             </div>
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={toggleMobileMenu}
-            className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-50 md:hidden dark:text-zinc-400 dark:hover:bg-zinc-800"
-            aria-label={isMobileMenuOpen ? "메뉴 닫기" : "메뉴 열기"}
-          >
-            {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
+          {/* Mobile header right side */}
+          <div className="flex items-center gap-1 md:hidden">
+            {user ? (
+              <Link
+                href="/goals"
+                onClick={closeMobileMenu}
+                className="relative flex items-center gap-1.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-gray-50 dark:hover:bg-zinc-800"
+                aria-label="내 학습 정보"
+              >
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-pink-100 text-xs font-bold text-pink-600 dark:bg-pink-950/40 dark:text-pink-300">
+                  {(user.name || user.email).charAt(0).toUpperCase()}
+                </div>
+                {syncStatus === "syncing" && (
+                  <RefreshCw size={10} className="absolute -bottom-0.5 -right-0.5 animate-spin text-pink-400" />
+                )}
+                {syncStatus === "error" && (
+                  <CloudOff size={10} className="absolute -bottom-0.5 -right-0.5 text-red-400" />
+                )}
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-medium text-pink-500 transition-colors hover:bg-pink-50 dark:hover:bg-pink-950/30"
+                aria-label="로그인"
+              >
+                <LogIn size={16} />
+                <span className="text-xs">로그인</span>
+              </Link>
+            )}
+            <button
+              onClick={toggleMobileMenu}
+              className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-50 dark:text-zinc-400 dark:hover:bg-zinc-800"
+              aria-label={isMobileMenuOpen ? "메뉴 닫기" : "메뉴 열기"}
+            >
+              {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          </div>
         </div>
       </div>
 

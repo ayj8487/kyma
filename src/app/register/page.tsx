@@ -59,19 +59,19 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-6 sm:py-12">
         <div className="w-full max-w-md">
           {/* Header */}
-          <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-foreground">회원가입</h1>
-            <p className="mt-2 text-accent-indigo dark:text-warm-400">
+          <div className="mb-6 sm:mb-8 text-center">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">회원가입</h1>
+            <p className="mt-2 text-sm sm:text-base text-accent-indigo dark:text-warm-400">
               Kyma와 함께 일본어 학습을 시작하세요
             </p>
           </div>
 
           {/* Register Card */}
-          <div className="rounded-2xl border border-warm-200 bg-white p-8 shadow-sm dark:border-warm-200 dark:bg-warm-100">
-            <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="rounded-2xl border border-warm-200 bg-white p-5 sm:p-8 shadow-sm dark:border-warm-200 dark:bg-warm-100">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
               {/* Name */}
               <div>
                 <label
