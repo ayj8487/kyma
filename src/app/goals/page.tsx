@@ -64,9 +64,9 @@ export default function GoalsPage() {
         </div>
 
         {/* Circular Progress */}
-        <div className="flex items-center gap-8">
-          <div className="relative w-32 h-32">
-            <svg className="w-32 h-32 -rotate-90" viewBox="0 0 120 120">
+        <div className="flex flex-col sm:flex-row items-center gap-5 sm:gap-8">
+          <div className="relative w-28 h-28 sm:w-32 sm:h-32 shrink-0">
+            <svg className="w-28 h-28 sm:w-32 sm:h-32 -rotate-90" viewBox="0 0 120 120">
               <circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" strokeWidth="10" className="text-gray-200 dark:text-zinc-700" />
               <circle cx="60" cy="60" r="52" fill="none" stroke="#4f46e5" strokeWidth="10" strokeDasharray={`${2 * Math.PI * 52}`} strokeDashoffset={`${2 * Math.PI * 52 * (1 - dailyProgress / 100)}`} strokeLinecap="round" className="transition-all duration-500" />
             </svg>
@@ -75,7 +75,7 @@ export default function GoalsPage() {
               <span className="text-xs text-gray-400 dark:text-zinc-500">/ {dailyGoal}</span>
             </div>
           </div>
-          <div>
+          <div className="text-center sm:text-left">
             <p className="text-lg font-medium mb-1">{motivMsg}</p>
             <p className="text-sm text-gray-500 dark:text-zinc-400">오늘 {todayStudyCount}개 학습 완료 ({Math.round(dailyProgress)}%)</p>
           </div>
@@ -123,7 +123,7 @@ export default function GoalsPage() {
       {/* 30-day Calendar */}
       <div className="bg-white dark:bg-zinc-800 border dark:border-zinc-700 rounded-2xl p-6">
         <h2 className="font-bold text-lg mb-4">최근 30일 학습 현황</h2>
-        <div className="grid grid-cols-10 gap-1">
+        <div className="grid grid-cols-10 gap-0.5 sm:gap-1">
           {calendarDays.map((d) => (
             <div key={d.date} className={`w-full aspect-square rounded-sm ${getColor(d.count)} transition-colors`} title={`${d.date}: ${d.count}개`} />
           ))}

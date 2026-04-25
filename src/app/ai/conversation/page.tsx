@@ -276,12 +276,12 @@ export default function AIConversationPage() {
           <h2 className="text-sm font-semibold text-gray-500 dark:text-zinc-400 mb-3">
             난이도 선택
           </h2>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             {levels.map((l) => (
               <button
                 key={l.id}
                 onClick={() => setLevel(l.id)}
-                className={`flex-1 px-4 py-3 rounded-xl border-2 transition-all text-center ${
+                className={`flex-1 min-w-[80px] px-4 py-3 rounded-xl border-2 transition-all text-center ${
                   level === l.id
                     ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:border-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-300"
                     : "border-gray-100 bg-white hover:border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-zinc-600 dark:text-zinc-300"
@@ -300,15 +300,15 @@ export default function AIConversationPage() {
           <h2 className="text-sm font-semibold text-gray-500 dark:text-zinc-400 mb-3">
             대화 주제
           </h2>
-          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {topics.map((t) => (
               <button
                 key={t.id}
                 onClick={() => startConversation(t.id)}
-                className="bg-white dark:bg-zinc-800 border-2 border-gray-100 dark:border-zinc-700 rounded-xl p-4 text-left hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-lg transition-all"
+                className="bg-white dark:bg-zinc-800 border-2 border-gray-100 dark:border-zinc-700 rounded-xl p-3 sm:p-4 text-left hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-lg transition-all"
               >
                 <span className="text-2xl">{t.emoji}</span>
-                <h3 className="font-bold mt-2 dark:text-zinc-100">{t.label}</h3>
+                <h3 className="font-bold mt-1 sm:mt-2 text-sm sm:text-base dark:text-zinc-100">{t.label}</h3>
               </button>
             ))}
           </div>

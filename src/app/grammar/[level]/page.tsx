@@ -104,16 +104,16 @@ export default function GrammarLevelPage({ params }: { params: Promise<{ level: 
                 onClick={() => setExpandedId(isExpanded ? null : g.id)}
                 className="w-full px-5 py-4 flex items-center justify-between text-left cursor-pointer"
               >
-                <div className="flex items-center gap-4">
-                  <div className="bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 w-10 h-10 rounded-lg flex items-center justify-center">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shrink-0">
                     <BookOpen size={18} />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <span
-                      className="text-lg font-bold text-violet-700 dark:text-violet-400 cursor-pointer hover:text-violet-900 dark:hover:text-violet-300 transition-colors"
+                      className="text-base sm:text-lg font-bold text-violet-700 dark:text-violet-400 cursor-pointer hover:text-violet-900 dark:hover:text-violet-300 transition-colors"
                       onClick={(e) => { e.stopPropagation(); speakJapanese(g.pattern); }}
                     >{g.pattern}</span>
-                    <span className="text-gray-500 dark:text-zinc-400 ml-3 text-sm">{g.meaning}</span>
+                    <span className="text-gray-500 dark:text-zinc-400 ml-2 text-xs sm:text-sm line-clamp-1 sm:line-clamp-none">{g.meaning}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

@@ -564,7 +564,7 @@ export default function QuizTypePage({
           </p>
           <div className="flex min-h-[140px] w-full flex-col items-center justify-center rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-800 px-4">
             <span
-              className={`font-bold text-zinc-900 dark:text-zinc-50 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors ${type === "grammar" ? "text-3xl sm:text-4xl" : "text-5xl sm:text-6xl"}`}
+              className={`font-bold text-zinc-900 dark:text-zinc-50 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors break-all text-center leading-tight ${type === "grammar" ? "text-2xl sm:text-3xl md:text-4xl" : "text-4xl sm:text-5xl lg:text-6xl"}`}
               onClick={() => speakJapanese(currentQuestion.question)}
             >
               {currentQuestion.question}

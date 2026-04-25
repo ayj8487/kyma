@@ -248,7 +248,7 @@ export default function FlashcardPage() {
                 className="flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg dark:border-zinc-700 dark:bg-zinc-800 sm:min-h-[380px]"
                 style={{ backfaceVisibility: "hidden" }}
               >
-                <span className="text-6xl font-bold text-zinc-900 dark:text-zinc-50 sm:text-7xl">
+                <span className="text-5xl font-bold text-zinc-900 dark:text-zinc-50 sm:text-6xl lg:text-7xl break-all text-center leading-tight">
                   {currentWord.word}
                 </span>
                 <p className="mt-6 text-sm text-zinc-400 dark:text-zinc-500">
