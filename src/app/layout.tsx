@@ -3,6 +3,7 @@ import { Noto_Sans_JP, Jua } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
+import { AuthProvider } from "@/components/AuthProvider";
 
 const notoSansJP = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
@@ -34,8 +35,10 @@ export default function RootLayout({
     <html lang="ko" suppressHydrationWarning>
       <body className={`${notoSansJP.variable} ${jua.variable} font-sans antialiased`}>
         <ThemeProvider>
-          <Navbar />
-          <main>{children}</main>
+          <AuthProvider>
+            <Navbar />
+            <main>{children}</main>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

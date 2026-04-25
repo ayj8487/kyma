@@ -1,98 +1,129 @@
+/**
+ * Client-side auth helpers — talk to /api/auth/* endpoints.
+ * Session is held in an HTTP-only cookie set by the server, so we cache the
+ * resolved user in localStorage purely as a UX hint (Navbar render before
+ * /api/auth/me resolves). The cookie is the source of truth.
+ */
+
 export interface AuthUser {
   id: string;
-  name: string;
+  name: string | null;
   email: string;
   role: string;
 }
 
-interface StoredUser extends AuthUser {
-  password: string;
+const SESSION_CACHE_KEY = "kyma-session";
+
+function setCachedUser(user: AuthUser | null) {
+  if (typeof window === "undefined") return;
+  if (user) {
+    localStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(user));
+  } else {
+    localStorage.removeItem(SESSION_CACHE_KEY);
+  }
 }
 
-const USERS_KEY = "kyma-users";
-const SESSION_KEY = "kyma-session";
-
-function getStoredUsers(): StoredUser[] {
-  if (typeof window === "undefined") return [];
-  const data = localStorage.getItem(USERS_KEY);
-  return data ? JSON.parse(data) : [];
+export function getCachedUser(): AuthUser | null {
+  if (typeof window === "undefined") return null;
+  const raw = localStorage.getItem(SESSION_CACHE_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as AuthUser;
+  } catch {
+    return null;
+  }
 }
 
-function saveStoredUsers(users: StoredUser[]): void {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-}
-
-function generateId(): string {
-  return `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-}
-
-export function register(
+export async function register(
   name: string,
   email: string,
   password: string
-): { success: boolean; user?: AuthUser; error?: string } {
-  const users = getStoredUsers();
-
-  if (users.some((u) => u.email === email)) {
-    return { success: false, error: "이미 등록된 이메일입니다." };
+): Promise<{ success: boolean; user?: AuthUser; error?: string }> {
+  try {
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      return { success: false, error: data.error || "회원가입에 실패했습니다." };
+    }
+    setCachedUser(data.user);
+    return { success: true, user: data.user };
+  } catch (err) {
+    console.error("[auth.register]", err);
+    return { success: false, error: "네트워크 오류가 발생했습니다." };
   }
-
-  const newUser: StoredUser = {
-    id: generateId(),
-    name,
-    email,
-    password,
-    role: "user",
-  };
-
-  users.push(newUser);
-  saveStoredUsers(users);
-
-  const authUser: AuthUser = {
-    id: newUser.id,
-    name: newUser.name,
-    email: newUser.email,
-    role: newUser.role,
-  };
-
-  localStorage.setItem(SESSION_KEY, JSON.stringify(authUser));
-
-  return { success: true, user: authUser };
 }
 
-export function login(
+export async function login(
   email: string,
   password: string
-): { success: boolean; user?: AuthUser; error?: string } {
-  const users = getStoredUsers();
-  const found = users.find((u) => u.email === email && u.password === password);
-
-  if (!found) {
-    return { success: false, error: "이메일 또는 비밀번호가 올바르지 않습니다." };
+): Promise<{ success: boolean; user?: AuthUser; error?: string }> {
+  try {
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      return { success: false, error: data.error || "로그인에 실패했습니다." };
+    }
+    setCachedUser(data.user);
+    return { success: true, user: data.user };
+  } catch (err) {
+    console.error("[auth.login]", err);
+    return { success: false, error: "네트워크 오류가 발생했습니다." };
   }
-
-  const authUser: AuthUser = {
-    id: found.id,
-    name: found.name,
-    email: found.email,
-    role: found.role,
-  };
-
-  localStorage.setItem(SESSION_KEY, JSON.stringify(authUser));
-
-  return { success: true, user: authUser };
 }
 
-export function logout(): void {
-  localStorage.removeItem(SESSION_KEY);
+export async function logout(): Promise<void> {
+  try {
+    await fetch("/api/auth/logout", { method: "POST" });
+  } catch (err) {
+    console.error("[auth.logout]", err);
+  } finally {
+    setCachedUser(null);
+  }
 }
 
+/**
+ * Validate the current session against the server.
+ * Returns the canonical AuthUser if logged in, otherwise null.
+ */
+export async function fetchCurrentUser(): Promise<AuthUser | null> {
+  try {
+    const res = await fetch("/api/auth/me", { cache: "no-store" });
+    if (!res.ok) {
+      setCachedUser(null);
+      return null;
+    }
+    const data = await res.json();
+    if (!data.user) {
+      setCachedUser(null);
+      return null;
+    }
+    const u: AuthUser = {
+      id: data.user.id,
+      email: data.user.email,
+      name: data.user.name,
+      role: data.user.role,
+    };
+    setCachedUser(u);
+    return u;
+  } catch (err) {
+    console.error("[auth.fetchCurrentUser]", err);
+    return null;
+  }
+}
+
+/** @deprecated Use fetchCurrentUser() for the authoritative answer. */
 export function getCurrentUser(): AuthUser | null {
-  if (typeof window === "undefined") return null;
-  const data = localStorage.getItem(SESSION_KEY);
-  return data ? JSON.parse(data) : null;
+  return getCachedUser();
 }
 
 export function isLoggedIn(): boolean {
-  return getCurrentUser() !== null;
+  return getCachedUser() !== null;
 }

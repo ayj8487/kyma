@@ -38,13 +38,11 @@ export default function LoginPage() {
 
     setIsLoading(true);
 
-    // Simulate network delay for UX
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    const result = login(email, password);
+    const result = await login(email, password);
 
     if (result.success) {
       router.push("/dashboard");
+      router.refresh();
     } else {
       setError(result.error || "로그인에 실패했습니다.");
     }

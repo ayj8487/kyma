@@ -23,6 +23,8 @@ interface QuizRecord {
   correctAnswers: number;
 }
 
+type SyncStatus = "idle" | "syncing" | "success" | "error";
+
 interface StudyStore {
   progress: Record<string, ProgressEntry>;
   quizHistory: QuizRecord[];
@@ -41,6 +43,11 @@ interface StudyStore {
 
   // Study history for goals calendar
   studyHistory: Record<string, number>;
+
+  // Sync metadata (not persisted to server, only local UI state)
+  syncStatus: SyncStatus;
+  lastSyncedAt: string | null;
+  lastSyncError: string | null;
 
   updateProgress: (contentType: string, contentId: string, isCorrect: boolean) => void;
   addQuizRecord: (record: Omit<QuizRecord, "date">) => void;
@@ -64,8 +71,29 @@ interface StudyStore {
   getDueItems: () => ProgressEntry[];
   getWrongItems: () => ProgressEntry[];
 
+  // Sync methods
+  pushToServer: () => Promise<{ success: boolean; error?: string }>;
+  pullFromServer: () => Promise<{ success: boolean; error?: string }>;
+  applyServerData: (data: Partial<SyncableState>) => void;
+  setSyncStatus: (status: SyncStatus, error?: string | null) => void;
+
   // Reset
   resetAllProgress: () => void;
+}
+
+/** Subset of state that gets pushed to /api/sync. */
+export interface SyncableState {
+  progress: Record<string, ProgressEntry>;
+  quizHistory: QuizRecord[];
+  streakCount: number;
+  lastStudyDate: string | null;
+  totalPoints: number;
+  todayStudyCount: number;
+  todayDate: string | null;
+  bookmarks: string[];
+  dailyGoal: number;
+  weeklyGoal: number;
+  studyHistory: Record<string, number>;
 }
 
 const getToday = () => new Date().toISOString().split("T")[0];
@@ -84,6 +112,10 @@ export const useStudyStore = create<StudyStore>()(
       dailyGoal: 10,
       weeklyGoal: 50,
       studyHistory: {},
+
+      syncStatus: "idle",
+      lastSyncedAt: null,
+      lastSyncError: null,
 
       updateProgress: (contentType, contentId, isCorrect) => {
         const key = `${contentType}:${contentId}`;
@@ -263,6 +295,106 @@ export const useStudyStore = create<StudyStore>()(
         );
       },
 
+      // Sync ----------------------------------------------------------------
+      setSyncStatus: (status, error = null) => {
+        set({
+          syncStatus: status,
+          lastSyncError: status === "error" ? error : null,
+          ...(status === "success" ? { lastSyncedAt: new Date().toISOString() } : {}),
+        });
+      },
+
+      applyServerData: (data) => {
+        set((state) => ({
+          progress: data.progress ?? state.progress,
+          quizHistory: data.quizHistory ?? state.quizHistory,
+          streakCount: data.streakCount ?? state.streakCount,
+          lastStudyDate: data.lastStudyDate ?? state.lastStudyDate,
+          totalPoints: data.totalPoints ?? state.totalPoints,
+          todayStudyCount: data.todayStudyCount ?? state.todayStudyCount,
+          todayDate: data.todayDate ?? state.todayDate,
+          bookmarks: data.bookmarks ?? state.bookmarks,
+          dailyGoal: data.dailyGoal ?? state.dailyGoal,
+          weeklyGoal: data.weeklyGoal ?? state.weeklyGoal,
+          studyHistory: data.studyHistory ?? state.studyHistory,
+        }));
+      },
+
+      pushToServer: async () => {
+        const state = get();
+        const userData: SyncableState = {
+          progress: state.progress,
+          quizHistory: state.quizHistory,
+          streakCount: state.streakCount,
+          lastStudyDate: state.lastStudyDate,
+          totalPoints: state.totalPoints,
+          todayStudyCount: state.todayStudyCount,
+          todayDate: state.todayDate,
+          bookmarks: state.bookmarks,
+          dailyGoal: state.dailyGoal,
+          weeklyGoal: state.weeklyGoal,
+          studyHistory: state.studyHistory,
+        };
+
+        set({ syncStatus: "syncing", lastSyncError: null });
+        try {
+          const res = await fetch("/api/sync", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userData,
+              totals: {
+                totalPoints: state.totalPoints,
+                streakCount: state.streakCount,
+                lastStudyDate: state.lastStudyDate,
+              },
+            }),
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            set({ syncStatus: "error", lastSyncError: data.error || "동기화 실패" });
+            return { success: false, error: data.error };
+          }
+          set({
+            syncStatus: "success",
+            lastSyncedAt: data.syncedAt || new Date().toISOString(),
+            lastSyncError: null,
+          });
+          return { success: true };
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "네트워크 오류";
+          set({ syncStatus: "error", lastSyncError: msg });
+          return { success: false, error: msg };
+        }
+      },
+
+      pullFromServer: async () => {
+        set({ syncStatus: "syncing", lastSyncError: null });
+        try {
+          const res = await fetch("/api/sync", { cache: "no-store" });
+          const data = await res.json();
+          if (!res.ok) {
+            set({ syncStatus: "error", lastSyncError: data.error || "불러오기 실패" });
+            return { success: false, error: data.error };
+          }
+          const serverData = (data.userData ?? {}) as Partial<SyncableState>;
+          // Only apply if server actually has data; otherwise keep local.
+          if (serverData && Object.keys(serverData).length > 0) {
+            get().applyServerData(serverData);
+          }
+          set({
+            syncStatus: "success",
+            lastSyncedAt: data.syncedAt || new Date().toISOString(),
+            lastSyncError: null,
+          });
+          return { success: true };
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "네트워크 오류";
+          set({ syncStatus: "error", lastSyncError: msg });
+          return { success: false, error: msg };
+        }
+      },
+
       resetAllProgress: () => {
         set({
           progress: {},
@@ -274,9 +406,21 @@ export const useStudyStore = create<StudyStore>()(
           todayDate: null,
           bookmarks: [],
           studyHistory: {},
+          syncStatus: "idle",
+          lastSyncedAt: null,
+          lastSyncError: null,
         });
       },
     }),
-    { name: "kyma-study-store" }
+    {
+      name: "kyma-study-store",
+      // Don't persist transient sync UI state to localStorage.
+      partialize: (state) => {
+        const persisted = { ...state } as Partial<StudyStore>;
+        delete persisted.syncStatus;
+        delete persisted.lastSyncError;
+        return persisted;
+      },
+    }
   )
 );

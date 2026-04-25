@@ -45,12 +45,11 @@ export default function RegisterPage() {
 
     setIsLoading(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    const result = register(name, email, password);
+    const result = await register(name, email, password);
 
     if (result.success) {
       router.push("/dashboard");
+      router.refresh();
     } else {
       setError(result.error || "회원가입에 실패했습니다.");
     }

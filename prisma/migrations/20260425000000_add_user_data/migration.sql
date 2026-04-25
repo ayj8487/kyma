@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN "userData" JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE "User" ADD COLUMN "syncedAt" TIMESTAMP(3);
