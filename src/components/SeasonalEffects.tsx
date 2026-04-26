@@ -38,8 +38,6 @@ export function SeasonalEffects() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let animId = 0;
-
     const setSize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = window.innerWidth * dpr;
@@ -52,14 +50,10 @@ export function SeasonalEffects() {
     const onResize = () => setSize();
     window.addEventListener("resize", onResize);
 
-    if (mode === "light") {
-      animId = startSakura(ctx);
-    } else {
-      animId = startFireworks(ctx);
-    }
+    const stop = mode === "light" ? startSakura(ctx) : startFireworks(ctx);
 
     return () => {
-      cancelAnimationFrame(animId);
+      stop();
       window.removeEventListener("resize", onResize);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     };
@@ -143,7 +137,7 @@ function drawPetal(ctx: CanvasRenderingContext2D, p: Petal) {
   ctx.restore();
 }
 
-function startSakura(ctx: CanvasRenderingContext2D): number {
+function startSakura(ctx: CanvasRenderingContext2D): () => void {
   // Density adapts to viewport; 1 petal per ~14k px²
   const area = window.innerWidth * window.innerHeight;
   const count = Math.min(60, Math.max(20, Math.floor(area / 14000)));
@@ -152,8 +146,10 @@ function startSakura(ctx: CanvasRenderingContext2D): number {
     petals.push(createPetal(Math.random() * window.innerHeight - window.innerHeight));
   }
 
+  let running = true;
   let id = 0;
   const tick = () => {
+    if (!running) return;
     const w = window.innerWidth;
     const h = window.innerHeight;
     ctx.clearRect(0, 0, w, h);
@@ -177,7 +173,10 @@ function startSakura(ctx: CanvasRenderingContext2D): number {
     id = requestAnimationFrame(tick);
   };
   id = requestAnimationFrame(tick);
-  return id;
+  return () => {
+    running = false;
+    cancelAnimationFrame(id);
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -215,10 +214,11 @@ const FIREWORK_PALETTES: string[][] = [
   ["#fb7185", "#fda4af", "#fecdd3"], // red
 ];
 
-function startFireworks(ctx: CanvasRenderingContext2D): number {
+function startFireworks(ctx: CanvasRenderingContext2D): () => void {
   const rockets: Rocket[] = [];
   const particles: Particle[] = [];
   let nextLaunchAt = performance.now() + 600;
+  let running = true;
 
   const launch = () => {
     const w = window.innerWidth;
@@ -256,6 +256,7 @@ function startFireworks(ctx: CanvasRenderingContext2D): number {
 
   let id = 0;
   const tick = () => {
+    if (!running) return;
     const w = window.innerWidth;
     const h = window.innerHeight;
 
@@ -335,5 +336,8 @@ function startFireworks(ctx: CanvasRenderingContext2D): number {
     id = requestAnimationFrame(tick);
   };
   id = requestAnimationFrame(tick);
-  return id;
+  return () => {
+    running = false;
+    cancelAnimationFrame(id);
+  };
 }
