@@ -37,13 +37,14 @@ export function getCachedUser(): AuthUser | null {
 export async function register(
   name: string,
   email: string,
-  password: string
+  password: string,
+  code: string
 ): Promise<{ success: boolean; user?: AuthUser; error?: string }> {
   try {
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password, code }),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -53,6 +54,26 @@ export async function register(
     return { success: true, user: data.user };
   } catch (err) {
     console.error("[auth.register]", err);
+    return { success: false, error: "네트워크 오류가 발생했습니다." };
+  }
+}
+
+export async function sendVerificationCode(
+  email: string
+): Promise<{ success: boolean; error?: string; devMode?: boolean }> {
+  try {
+    const res = await fetch("/api/auth/send-code", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      return { success: false, error: data.error || "인증 코드 발송에 실패했습니다." };
+    }
+    return { success: true, devMode: data.devMode === true };
+  } catch (err) {
+    console.error("[auth.sendVerificationCode]", err);
     return { success: false, error: "네트워크 오류가 발생했습니다." };
   }
 }

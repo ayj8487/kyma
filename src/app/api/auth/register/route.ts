@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createHash } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import {
   hashPassword,
@@ -9,18 +10,32 @@ import {
 
 export const runtime = "nodejs";
 
+const MAX_CODE_ATTEMPTS = 5;
+
+function hashCode(code: string): string {
+  return createHash("sha256").update(code).digest("hex");
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, password } = body as {
+    const { name, email, password, code } = body as {
       name?: string;
       email?: string;
       password?: string;
+      code?: string;
     };
 
     if (!name || !email || !password) {
       return NextResponse.json(
         { error: "이름, 이메일, 비밀번호를 모두 입력해주세요." },
+        { status: 400 }
+      );
+    }
+
+    if (!code || !/^\d{6}$/.test(code)) {
+      return NextResponse.json(
+        { error: "6자리 인증 코드를 입력해주세요." },
         { status: 400 }
       );
     }
@@ -41,6 +56,50 @@ export async function POST(req: NextRequest) {
 
     const normalizedEmail = email.trim().toLowerCase();
 
+    // Verify the code
+    const stored = await prisma.emailVerificationCode.findFirst({
+      where: { email: normalizedEmail },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!stored) {
+      return NextResponse.json(
+        { error: "인증 코드를 먼저 발송해주세요." },
+        { status: 400 }
+      );
+    }
+
+    if (stored.expiresAt < new Date()) {
+      await prisma.emailVerificationCode.deleteMany({ where: { email: normalizedEmail } });
+      return NextResponse.json(
+        { error: "인증 코드가 만료되었습니다. 다시 발송해주세요." },
+        { status: 400 }
+      );
+    }
+
+    if (stored.attempts >= MAX_CODE_ATTEMPTS) {
+      await prisma.emailVerificationCode.deleteMany({ where: { email: normalizedEmail } });
+      return NextResponse.json(
+        { error: "잘못된 시도가 너무 많습니다. 코드를 다시 발송해주세요." },
+        { status: 429 }
+      );
+    }
+
+    if (stored.code !== hashCode(code)) {
+      await prisma.emailVerificationCode.update({
+        where: { id: stored.id },
+        data: { attempts: { increment: 1 } },
+      });
+      const remaining = MAX_CODE_ATTEMPTS - stored.attempts - 1;
+      return NextResponse.json(
+        {
+          error: `인증 코드가 일치하지 않습니다. (남은 시도: ${Math.max(0, remaining)}회)`,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Check email duplicate AFTER code verification
     const existing = await prisma.user.findUnique({
       where: { email: normalizedEmail },
     });
@@ -66,6 +125,11 @@ export async function POST(req: NextRequest) {
         name: true,
         role: true,
       },
+    });
+
+    // Burn the verification code (one-time use)
+    await prisma.emailVerificationCode.deleteMany({
+      where: { email: normalizedEmail },
     });
 
     const token = signSession(user.id);

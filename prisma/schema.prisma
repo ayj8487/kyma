@@ -96,3 +96,14 @@ model Bookmark {
 
   @@unique([userId, contentType, contentId])
 }
+
+model EmailVerificationCode {
+  id        String   @id @default(cuid())
+  email     String
+  code      String   // 6-digit code (hashed)
+  attempts  Int      @default(0)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
