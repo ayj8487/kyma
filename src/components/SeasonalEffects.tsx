@@ -260,9 +260,13 @@ function startFireworks(ctx: CanvasRenderingContext2D): () => void {
     const w = window.innerWidth;
     const h = window.innerHeight;
 
-    // Subtle motion-blur effect by painting a translucent black layer
-    ctx.fillStyle = "rgba(15, 8, 20, 0.18)";
+    // Erase previous frame quickly so rocket trail fades fast.
+    // destination-out actually subtracts alpha (true clearing) instead of
+    // layering a dark color, so trails don't accumulate visible residue.
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
     ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = "source-over";
 
     // Schedule next rocket
     const now = performance.now();
@@ -275,29 +279,27 @@ function startFireworks(ctx: CanvasRenderingContext2D): () => void {
     for (let i = rockets.length - 1; i >= 0; i--) {
       const r = rockets[i];
       r.trail.push({ x: r.x, y: r.y, alpha: 1 });
-      if (r.trail.length > 10) r.trail.shift();
+      if (r.trail.length > 4) r.trail.shift(); // shorter visible trail
       r.y += r.vy;
       r.vy += 0.08; // gravity slowing rise
 
-      // Draw trail
+      // Draw trail (smaller + fainter)
       for (let t = 0; t < r.trail.length; t++) {
         const tr = r.trail[t];
-        const a = (t / r.trail.length) * 0.5;
+        const a = (t / r.trail.length) * 0.35;
         ctx.globalAlpha = a;
         ctx.fillStyle = r.color;
         ctx.beginPath();
-        ctx.arc(tr.x, tr.y, 1.5, 0, Math.PI * 2);
+        ctx.arc(tr.x, tr.y, 1, 0, Math.PI * 2);
         ctx.fill();
       }
-      // Head
+      // Head with light glow
       ctx.globalAlpha = 1;
+      ctx.shadowBlur = 6;
+      ctx.shadowColor = r.color;
       ctx.fillStyle = r.color;
       ctx.beginPath();
-      ctx.arc(r.x, r.y, 2.5, 0, Math.PI * 2);
-      ctx.fill();
-      // Glow
-      ctx.shadowBlur = 12;
-      ctx.shadowColor = r.color;
+      ctx.arc(r.x, r.y, 2, 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
 
