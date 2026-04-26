@@ -31,11 +31,13 @@ import {
   CloudOff,
   RefreshCw,
   Check,
+  Search,
 } from "lucide-react";
 import { useThemeStore, applyTheme } from "@/store/useThemeStore";
 import { useAuth } from "@/components/AuthProvider";
 import { logout as authLogout } from "@/lib/auth";
 import { useStudyStore } from "@/store/useStudyStore";
+import { useCommandPalette } from "@/components/CommandPalette";
 
 interface NavItem {
   href: string;
@@ -78,6 +80,7 @@ export function Navbar() {
   const pathname = usePathname();
   const { theme, setTheme } = useThemeStore();
   const { user, setUser } = useAuth();
+  const { open: openSearch } = useCommandPalette();
   const syncStatus = useStudyStore((s) => s.syncStatus);
   const lastSyncedAt = useStudyStore((s) => s.lastSyncedAt);
   const pushToServer = useStudyStore((s) => s.pushToServer);
@@ -240,6 +243,19 @@ export function Navbar() {
               )}
             </div>
 
+            {/* Search button (desktop) */}
+            <button
+              onClick={openSearch}
+              className="ml-1 flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+              aria-label="메뉴 검색"
+              title="메뉴 검색 (Ctrl+K)"
+            >
+              <Search size={15} />
+              <kbd className="hidden lg:inline rounded border border-gray-200 bg-white px-1 py-px text-[10px] font-medium text-gray-400 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-500">
+                ⌘K
+              </kbd>
+            </button>
+
             {/* User dropdown */}
             <div className="relative ml-1" ref={userRef}>
               {user ? (
@@ -315,6 +331,13 @@ export function Navbar() {
 
           {/* Mobile header right side */}
           <div className="flex items-center gap-1 md:hidden">
+            <button
+              onClick={openSearch}
+              className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-50 dark:text-zinc-400 dark:hover:bg-zinc-800"
+              aria-label="메뉴 검색"
+            >
+              <Search size={20} />
+            </button>
             {user ? (
               <Link
                 href="/goals"

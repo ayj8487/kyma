@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { AuthProvider } from "@/components/AuthProvider";
+import { CommandPaletteProvider } from "@/components/CommandPalette";
 
 const notoSansJP = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
@@ -36,8 +37,10 @@ export default function RootLayout({
       <body className={`${notoSansJP.variable} ${jua.variable} font-sans antialiased`}>
         <ThemeProvider>
           <AuthProvider>
-            <Navbar />
-            <main>{children}</main>
+            <CommandPaletteProvider>
+              <Navbar />
+              <main>{children}</main>
+            </CommandPaletteProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>
