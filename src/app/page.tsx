@@ -65,21 +65,22 @@ const features = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white dark:bg-[#1a0f1a]">
+    <div className="relative min-h-screen overflow-x-hidden bg-gradient-to-b from-pink-50/60 via-white to-pink-50/30 dark:from-fuchsia-950/30 dark:via-[#1a0f1a] dark:to-[#13081a]">
+      {/* Page-wide decorative blur orbs (spread across entire page, not just hero) */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-pink-100/50 dark:bg-fuchsia-900/25 blur-3xl" />
+        <div className="absolute top-20 -left-20 h-72 w-72 rounded-full bg-violet-100/30 dark:bg-purple-800/20 blur-3xl" />
+        <div className="absolute top-[40%] right-1/4 h-60 w-60 rounded-full bg-amber-50/40 dark:bg-rose-900/20 blur-3xl" />
+        <div className="absolute top-[70%] -left-32 h-80 w-80 rounded-full bg-rose-100/30 dark:bg-fuchsia-900/20 blur-3xl" />
+        <div className="absolute bottom-32 right-0 h-72 w-72 rounded-full bg-pink-100/40 dark:bg-purple-900/20 blur-3xl" />
+      </div>
+
       {/* 🌸 라이트 모드: 벚꽃 / 🎆 다크 모드: 폭죽 */}
       <SeasonalEffects />
 
       {/* Hero Section */}
-      <section className="relative z-10 overflow-hidden">
-        {/* Soft gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-pink-50/80 via-white to-white dark:from-fuchsia-950/40 dark:via-[#1a0f1a] dark:to-[#1a0f1a]" />
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-pink-100/50 dark:bg-fuchsia-900/25 blur-3xl" />
-          <div className="absolute top-20 -left-20 h-72 w-72 rounded-full bg-violet-100/30 dark:bg-purple-800/20 blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 h-60 w-60 rounded-full bg-amber-50/40 dark:bg-rose-900/20 blur-3xl" />
-        </div>
-
-        <div className="relative mx-auto max-w-5xl px-4 pb-16 pt-20 sm:px-6 sm:pt-28 lg:px-8 lg:pt-36">
+      <section className="relative z-10">
+        <div className="mx-auto max-w-5xl px-4 pb-16 pt-20 sm:px-6 sm:pt-28 lg:px-8 lg:pt-36">
           <div className="flex flex-col items-center text-center">
             {/* Badge */}
             <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white px-4 py-1.5 text-sm font-medium text-pink-500 shadow-sm dark:bg-[#241525] dark:border-fuchsia-700">
@@ -164,7 +165,7 @@ export default function Home() {
 
       {/* CTA Section */}
       <section className="relative z-10 mx-4 mb-16 sm:mx-6 lg:mx-auto lg:max-w-5xl">
-        <div className="rounded-3xl bg-gradient-to-r from-pink-50 to-rose-50 dark:from-fuchsia-950/40 dark:to-rose-950/30 px-6 py-14 text-center sm:px-12">
+        <div className="rounded-3xl bg-gradient-to-r from-pink-50/90 to-rose-50/90 backdrop-blur-sm dark:from-fuchsia-950/40 dark:to-rose-950/30 px-6 py-14 text-center sm:px-12">
           <h2 className="text-2xl font-bold text-gray-700 dark:text-zinc-100 sm:text-3xl">
             지금 바로 시작하세요
           </h2>
