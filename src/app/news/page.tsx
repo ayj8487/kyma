@@ -62,6 +62,7 @@ export default function NewsPage() {
   const [translating, setTranslating] = useState(false);
   const [showSummaryKo, setShowSummaryKo] = useState(false);
   const [summaryTranslation, setSummaryTranslation] = useState<string | null>(null);
+  const [translateError, setTranslateError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
   const PAGE_SIZE = 10;
@@ -103,6 +104,7 @@ export default function NewsPage() {
   const handleAiTranslate = async (text: string, setter: (v: string) => void) => {
     if (translating) return;
     setTranslating(true);
+    setTranslateError(null);
     try {
       const res = await fetch("/api/ai/translate", {
         method: "POST",
@@ -110,11 +112,41 @@ export default function NewsPage() {
         body: JSON.stringify({ text }),
       });
       const data = await res.json();
-      setter(data.translation ?? "번역 실패");
+      if (!res.ok) {
+        const msg =
+          data.error === "API key not configured"
+            ? "AI 번역 기능이 설정되지 않았습니다. (GROQ_API_KEY 환경변수 필요)"
+            : data.error || "번역에 실패했습니다.";
+        setTranslateError(msg);
+        return;
+      }
+      if (!data.translation) {
+        setTranslateError("번역 결과가 비어 있습니다.");
+        return;
+      }
+      setter(data.translation);
     } catch {
-      setter("번역에 실패했습니다.");
+      setTranslateError("네트워크 오류로 번역에 실패했습니다.");
     } finally {
       setTranslating(false);
+    }
+  };
+
+  const toggleSummaryTranslation = () => {
+    if (!selectedLive) return;
+    if (showSummaryKo) {
+      // 닫기
+      setShowSummaryKo(false);
+      setTranslateError(null);
+      return;
+    }
+    // 열기 + 아직 번역 결과 없으면 즉시 호출
+    setShowSummaryKo(true);
+    if (!summaryTranslation) {
+      handleAiTranslate(
+        selectedLive.title + "\n" + selectedLive.summary,
+        setSummaryTranslation
+      );
     }
   };
 
@@ -159,7 +191,7 @@ export default function NewsPage() {
             /* 기사 상세 */
             <div>
               <button
-                onClick={() => { setSelectedLive(null); setAiTranslation(null); setShowSummaryKo(false); setSummaryTranslation(null); }}
+                onClick={() => { setSelectedLive(null); setAiTranslation(null); setShowSummaryKo(false); setSummaryTranslation(null); setTranslateError(null); }}
                 className="text-indigo-600 dark:text-indigo-400 hover:underline text-sm mb-4 block"
               >← 목록으로</button>
 
@@ -181,22 +213,24 @@ export default function NewsPage() {
                     <Volume2 size={14} /> 제목 듣기
                   </button>
                   <button
-                    onClick={() => setShowSummaryKo(!showSummaryKo)}
-                    className="px-3 py-1.5 bg-gray-100 text-gray-600 dark:bg-zinc-700 dark:text-zinc-300 rounded-lg text-sm flex items-center gap-1"
+                    onClick={toggleSummaryTranslation}
+                    disabled={translating}
+                    className="px-3 py-1.5 bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 rounded-lg text-sm flex items-center gap-1 disabled:opacity-50"
                   >
-                    {showSummaryKo ? <EyeOff size={14} /> : <Eye size={14} />}
-                    {showSummaryKo ? "번역 숨기기" : "번역 보기"}
+                    {translating ? (
+                      <>
+                        <Loader2 size={14} className="animate-spin" /> AI 번역 중...
+                      </>
+                    ) : showSummaryKo ? (
+                      <>
+                        <EyeOff size={14} /> 번역 숨기기
+                      </>
+                    ) : (
+                      <>
+                        <Eye size={14} /> 번역 보기 ✨
+                      </>
+                    )}
                   </button>
-                  {showSummaryKo && !summaryTranslation && (
-                    <button
-                      onClick={() => handleAiTranslate(selectedLive.title + "\n" + selectedLive.summary, setSummaryTranslation)}
-                      disabled={translating}
-                      className="px-3 py-1.5 bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 rounded-lg text-sm flex items-center gap-1 disabled:opacity-50"
-                    >
-                      {translating ? <Loader2 size={14} className="animate-spin" /> : "✨"}
-                      {translating ? "번역 중..." : "AI 번역"}
-                    </button>
-                  )}
                   <a
                     href={selectedLive.link}
                     target="_blank"
@@ -218,14 +252,41 @@ export default function NewsPage() {
                   <p className="text-base leading-relaxed dark:text-zinc-100">{selectedLive.summary}</p>
                 </div>
 
-                {/* AI 번역 */}
-                {showSummaryKo && summaryTranslation && (
-                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl p-4 mb-4">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-blue-500 dark:text-blue-400">AI 번역</span>
-                      <button onClick={() => setSummaryTranslation(null)} className="text-xs text-gray-400">✕</button>
-                    </div>
-                    <p className="text-sm text-blue-900 dark:text-blue-200 leading-relaxed whitespace-pre-line">{summaryTranslation}</p>
+                {/* AI 번역 결과 / 로딩 / 에러 */}
+                {showSummaryKo && (
+                  <div className="mb-4">
+                    {translating && !summaryTranslation && (
+                      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl p-4 flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300">
+                        <Loader2 size={16} className="animate-spin" />
+                        AI가 번역 중입니다...
+                      </div>
+                    )}
+                    {translateError && (
+                      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 text-sm text-red-700 dark:text-red-300">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="font-medium mb-1">번역 실패</p>
+                            <p className="text-xs">{translateError}</p>
+                          </div>
+                          <button
+                            onClick={() => handleAiTranslate(selectedLive.title + "\n" + selectedLive.summary, setSummaryTranslation)}
+                            disabled={translating}
+                            className="shrink-0 px-2 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-900/40 dark:hover:bg-red-900/60 rounded text-xs font-medium disabled:opacity-50"
+                          >
+                            재시도
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {summaryTranslation && !translateError && (
+                      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl p-4">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-medium text-blue-500 dark:text-blue-400">✨ AI 번역</span>
+                          <button onClick={() => { setSummaryTranslation(null); setShowSummaryKo(false); }} className="text-xs text-gray-400 hover:text-gray-600">✕</button>
+                        </div>
+                        <p className="text-sm text-blue-900 dark:text-blue-200 leading-relaxed whitespace-pre-line">{summaryTranslation}</p>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -308,7 +369,7 @@ export default function NewsPage() {
                     {pagedArticles.map((article) => (
                       <button
                         key={article.id}
-                        onClick={() => { setSelectedLive(article); setAiTranslation(null); setShowSummaryKo(false); setSummaryTranslation(null); }}
+                        onClick={() => { setSelectedLive(article); setAiTranslation(null); setShowSummaryKo(false); setSummaryTranslation(null); setTranslateError(null); }}
                         className="bg-white border rounded-xl p-5 text-left hover:shadow-md hover:border-indigo-200 transition-all dark:bg-zinc-800 dark:border-zinc-700 dark:hover:border-indigo-500"
                       >
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
