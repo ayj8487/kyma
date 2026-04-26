@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, Timer, Target, Zap, RotateCcw, Keyboard, SkipForward, Eye, MessageSquare } from "lucide-react";
+import { ArrowLeft, Timer, Target, Zap, RotateCcw, Keyboard, SkipForward, Eye, MessageSquare, Infinity as InfinityIcon } from "lucide-react";
 import { hiraganaData, katakanaData } from "@/data/kana";
 import { n5Words } from "@/data/words";
 import { n4Words } from "@/data/words-n4";
@@ -126,26 +126,44 @@ const wordsByLevel: Record<string, typeof n5Words> = {
   N5: n5Words, N4: n4Words, N3: n3Words, N2: n2Words, N1: n1Words,
 };
 
+// 0 = 무제한
+const TIME_OPTIONS = [30, 60, 90, 120, 180, 0] as const;
+type TimeOption = (typeof TIME_OPTIONS)[number];
+
+// 모드별 추천 시간
+const MODE_DEFAULT_TIME: Record<Mode, TimeOption> = {
+  hiragana: 60,
+  katakana: 60,
+  word: 90,
+  sentence: 120,
+};
+
 export default function TypingPage() {
   const [mode, setMode] = useState<Mode | null>(null);
   const [gameVariant, setGameVariant] = useState<string>("basic");
+  const [selectedTime, setSelectedTime] = useState<TimeOption>(60);
+  const [totalTime, setTotalTime] = useState<TimeOption>(60); // time chosen for the active game
   const [items, setItems] = useState<TypingItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [completedCount, setCompletedCount] = useState(0); // for unlimited mode termination
   const [input, setInput] = useState("");
   const [score, setScore] = useState(0);
   const [mistakes, setMistakes] = useState(0);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
   const [timeLeft, setTimeLeft] = useState(60);
+  const [elapsed, setElapsed] = useState(0); // for unlimited mode display
   const [isRunning, setIsRunning] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const startGame = useCallback((m: Mode, variant: string) => {
+  const startGame = useCallback((m: Mode, variant: string, timeOverride?: TimeOption) => {
     setMode(m);
     setGameVariant(variant);
+    const time = timeOverride ?? selectedTime;
+    setTotalTime(time);
 
     let pool: TypingItem[] = [];
 
@@ -179,21 +197,24 @@ export default function TypingPage() {
 
     setItems([...pool].sort(() => Math.random() - 0.5));
     setCurrentIndex(0);
+    setCompletedCount(0);
     setInput("");
     setScore(0);
     setMistakes(0);
     setStreak(0);
     setBestStreak(0);
-    setTimeLeft(60);
+    setTimeLeft(time === 0 ? 0 : time);
+    setElapsed(0);
     setIsRunning(true);
     setIsFinished(false);
     setFeedback(null);
     setShowAnswer(false);
     setTimeout(() => inputRef.current?.focus(), 100);
-  }, []);
+  }, [selectedTime]);
 
+  // Countdown timer (timed mode only)
   useEffect(() => {
-    if (!isRunning || isFinished) return;
+    if (!isRunning || isFinished || totalTime === 0) return;
     const timer = setInterval(() => {
       setTimeLeft((t) => {
         if (t <= 1) { setIsRunning(false); setIsFinished(true); return 0; }
@@ -201,7 +222,27 @@ export default function TypingPage() {
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [isRunning, isFinished]);
+  }, [isRunning, isFinished, totalTime]);
+
+  // Stopwatch (unlimited mode only — for display)
+  useEffect(() => {
+    if (!isRunning || isFinished || totalTime !== 0) return;
+    const timer = setInterval(() => setElapsed((s) => s + 1), 1000);
+    return () => clearInterval(timer);
+  }, [isRunning, isFinished, totalTime]);
+
+  const advanceToNext = useCallback(() => {
+    setCompletedCount((c) => {
+      const newCount = c + 1;
+      // Unlimited mode: end when every item has been seen at least once.
+      if (totalTime === 0 && newCount >= items.length) {
+        setIsRunning(false);
+        setIsFinished(true);
+      }
+      return newCount;
+    });
+    setCurrentIndex((i) => (i + 1) % items.length);
+  }, [items.length, totalTime]);
 
   const handleInput = (value: string) => {
     setInput(value);
@@ -214,7 +255,7 @@ export default function TypingPage() {
       setFeedback("correct");
       setInput("");
       setShowAnswer(false);
-      setCurrentIndex((i) => (i + 1) % items.length);
+      advanceToNext();
       setTimeout(() => setFeedback(null), 300);
     } else if (value.length >= answer.length) {
       setMistakes((m) => m + 1);
@@ -232,7 +273,7 @@ export default function TypingPage() {
     setFeedback("wrong");
     setInput("");
     setShowAnswer(false);
-    setCurrentIndex((i) => (i + 1) % items.length);
+    advanceToNext();
     setTimeout(() => setFeedback(null), 300);
     inputRef.current?.focus();
   };
@@ -253,7 +294,43 @@ export default function TypingPage() {
           <ArrowLeft size={14} /> 대시보드
         </Link>
         <h1 className="text-3xl font-bold mb-2 dark:text-zinc-50">⌨️ 일본어 타자 연습</h1>
-        <p className="text-gray-600 dark:text-zinc-400 mb-8">60초 안에 최대한 많은 문자를 정확하게 입력하세요</p>
+        <p className="text-gray-600 dark:text-zinc-400 mb-6">제한 시간 안에 최대한 많은 문자를 정확하게 입력하세요</p>
+
+        {/* 시간 선택 */}
+        <div className="mb-6 rounded-2xl border border-gray-100 bg-white dark:border-zinc-700 dark:bg-zinc-800/50 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Timer size={14} className="text-indigo-500" />
+            <span className="text-xs font-medium text-gray-500 dark:text-zinc-400">제한 시간</span>
+            <span className="ml-auto text-xs text-gray-400 dark:text-zinc-500">
+              현재 선택: {selectedTime === 0 ? "무제한" : `${selectedTime}초`}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {TIME_OPTIONS.map((t) => (
+              <button
+                key={t}
+                onClick={() => setSelectedTime(t)}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                  selectedTime === t
+                    ? "bg-indigo-600 text-white"
+                    : "bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-600"
+                }`}
+              >
+                {t === 0 ? (
+                  <>
+                    <InfinityIcon size={12} />
+                    무제한
+                  </>
+                ) : (
+                  `${t}초`
+                )}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2.5 text-xs text-gray-400 dark:text-zinc-500">
+            💡 무제한 모드는 모든 문제를 풀면 자동으로 종료됩니다.
+          </p>
+        </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
@@ -261,7 +338,8 @@ export default function TypingPage() {
           <div className="rounded-xl border-2 border-indigo-200 bg-white p-6 dark:bg-zinc-800 dark:border-indigo-800">
             <div className="text-4xl mb-3 w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 font-bold dark:bg-indigo-900/40 dark:text-indigo-400">あ</div>
             <h3 className="font-bold text-lg dark:text-zinc-100">히라가나 타이핑</h3>
-            <p className="text-gray-500 dark:text-zinc-400 text-sm mt-1 mb-4">히라가나를 보고 로마지 입력</p>
+            <p className="text-gray-500 dark:text-zinc-400 text-sm mt-1 mb-2">히라가나를 보고 로마지 입력</p>
+            <p className="text-xs text-indigo-500 dark:text-indigo-400 mb-3">추천: {MODE_DEFAULT_TIME.hiragana}초</p>
             <div className="flex gap-2">
               <button onClick={() => startGame("hiragana", "basic")} className="flex-1 py-2 bg-indigo-100 text-indigo-700 rounded-lg text-sm hover:bg-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-300 dark:hover:bg-indigo-900/60 font-medium">
                 기본<br /><span className="text-xs font-normal opacity-70">46자</span>
@@ -276,7 +354,8 @@ export default function TypingPage() {
           <div className="rounded-xl border-2 border-violet-200 bg-white p-6 dark:bg-zinc-800 dark:border-violet-800">
             <div className="text-4xl mb-3 w-14 h-14 bg-violet-100 rounded-xl flex items-center justify-center text-violet-600 font-bold dark:bg-violet-900/40 dark:text-violet-400">ア</div>
             <h3 className="font-bold text-lg dark:text-zinc-100">가타카나 타이핑</h3>
-            <p className="text-gray-500 dark:text-zinc-400 text-sm mt-1 mb-4">가타카나를 보고 로마지 입력</p>
+            <p className="text-gray-500 dark:text-zinc-400 text-sm mt-1 mb-2">가타카나를 보고 로마지 입력</p>
+            <p className="text-xs text-violet-500 dark:text-violet-400 mb-3">추천: {MODE_DEFAULT_TIME.katakana}초</p>
             <div className="flex gap-2">
               <button onClick={() => startGame("katakana", "basic")} className="flex-1 py-2 bg-violet-100 text-violet-700 rounded-lg text-sm hover:bg-violet-200 dark:bg-violet-900/40 dark:text-violet-300 dark:hover:bg-violet-900/60 font-medium">
                 기본<br /><span className="text-xs font-normal opacity-70">46자</span>
@@ -291,7 +370,8 @@ export default function TypingPage() {
           <div className="rounded-xl border-2 border-purple-200 bg-white p-6 dark:bg-zinc-800 dark:border-purple-800">
             <div className="text-4xl mb-3 w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600 font-bold dark:bg-purple-900/40 dark:text-purple-400">漢</div>
             <h3 className="font-bold text-lg dark:text-zinc-100">단어 타이핑</h3>
-            <p className="text-gray-500 dark:text-zinc-400 text-sm mt-1 mb-4">단어를 보고 히라가나 입력</p>
+            <p className="text-gray-500 dark:text-zinc-400 text-sm mt-1 mb-2">단어를 보고 히라가나 입력</p>
+            <p className="text-xs text-purple-500 dark:text-purple-400 mb-3">추천: {MODE_DEFAULT_TIME.word}초</p>
             <div className="flex flex-wrap gap-1.5">
               {(["N5", "N4", "N3", "N2", "N1", "전체"] as const).map((lv) => (
                 <button
@@ -311,7 +391,8 @@ export default function TypingPage() {
               <MessageSquare size={28} />
             </div>
             <h3 className="font-bold text-lg dark:text-zinc-100">문장 타이핑</h3>
-            <p className="text-gray-500 dark:text-zinc-400 text-sm mt-1 mb-4">문장을 보고 히라가나 읽기 입력</p>
+            <p className="text-gray-500 dark:text-zinc-400 text-sm mt-1 mb-2">문장을 보고 히라가나 읽기 입력</p>
+            <p className="text-xs text-emerald-500 dark:text-emerald-400 mb-3">추천: {MODE_DEFAULT_TIME.sentence}초</p>
             <div className="flex flex-wrap gap-1.5">
               {(["N5", "N4", "N3", "N2", "N1", "전체"] as const).map((lv) => (
                 <button
@@ -357,7 +438,10 @@ export default function TypingPage() {
         <div className="text-6xl mb-4">🎯</div>
         <h2 className="text-3xl font-bold mb-1 dark:text-zinc-50">타이핑 결과</h2>
         <p className="text-sm text-gray-400 dark:text-zinc-500 mb-6">
-          {mode === "hiragana" && "히라가나"}{mode === "katakana" && "가타카나"}{mode === "word" && "단어"}{mode === "sentence" && "문장"} · {variantLabel}
+          {mode === "hiragana" && "히라가나"}{mode === "katakana" && "가타카나"}{mode === "word" && "단어"}{mode === "sentence" && "문장"} · {variantLabel} ·{" "}
+          {totalTime === 0
+            ? `무제한 (${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, "0")})`
+            : `${totalTime}초`}
         </p>
         <div className="grid grid-cols-2 gap-4 my-6">
           <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-xl p-4">
@@ -404,7 +488,13 @@ export default function TypingPage() {
           {mode === "hiragana" && "히라가나"}{mode === "katakana" && "가타카나"}{mode === "word" && "단어"}{mode === "sentence" && "문장"} · {variantLabel}
         </span>
         <div className="flex items-center gap-4 text-sm">
-          <span className="flex items-center gap-1 text-orange-600 dark:text-orange-400"><Timer size={15} />{timeLeft}초</span>
+          <span className="flex items-center gap-1 text-orange-600 dark:text-orange-400">
+            {totalTime === 0 ? (
+              <><InfinityIcon size={15} />{Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, "0")}</>
+            ) : (
+              <><Timer size={15} />{timeLeft}초</>
+            )}
+          </span>
           <span className="flex items-center gap-1 text-green-600 dark:text-green-400"><Target size={15} />{score}점</span>
           <span className="flex items-center gap-1 text-violet-600 dark:text-violet-400"><Zap size={15} />{streak}연속</span>
         </div>
@@ -492,13 +582,27 @@ export default function TypingPage() {
         />
       </div>
 
-      {/* 타임바 */}
+      {/* 타임바 / 진행바 */}
       <div className="mt-4 bg-gray-100 dark:bg-zinc-700 rounded-full h-2">
-        <div
-          className={`h-2 rounded-full transition-all ${timeLeft <= 10 ? "bg-red-500" : "bg-indigo-500"}`}
-          style={{ width: `${(timeLeft / 60) * 100}%` }}
-        />
+        {totalTime === 0 ? (
+          // 무제한: 진행도 표시 (완료/전체)
+          <div
+            className="h-2 rounded-full transition-all bg-emerald-500"
+            style={{ width: `${items.length > 0 ? (completedCount / items.length) * 100 : 0}%` }}
+          />
+        ) : (
+          // 시간 제한: 남은 시간 비율
+          <div
+            className={`h-2 rounded-full transition-all ${timeLeft <= 10 ? "bg-red-500" : "bg-indigo-500"}`}
+            style={{ width: `${(timeLeft / totalTime) * 100}%` }}
+          />
+        )}
       </div>
+      {totalTime === 0 && (
+        <p className="text-xs text-gray-400 dark:text-zinc-500 text-center mt-2">
+          {completedCount} / {items.length} 문항 완료
+        </p>
+      )}
     </div>
   );
 }
