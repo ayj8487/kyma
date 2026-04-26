@@ -5,9 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, LogIn, Github } from "lucide-react";
 import { login } from "@/lib/auth";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { setUser } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -40,7 +42,9 @@ export default function LoginPage() {
 
     const result = await login(email, password);
 
-    if (result.success) {
+    if (result.success && result.user) {
+      // Push the new user into AuthProvider so the Navbar updates immediately.
+      setUser(result.user);
       router.push("/dashboard");
       router.refresh();
     } else {
