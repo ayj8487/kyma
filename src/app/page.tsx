@@ -10,6 +10,7 @@ import {
   Keyboard,
   Newspaper,
 } from "lucide-react";
+import { SeasonalEffects } from "@/components/SeasonalEffects";
 
 const features = [
   {
@@ -65,8 +66,11 @@ const features = [
 export default function Home() {
   return (
     <div className="min-h-screen bg-white dark:bg-[#1a0f1a]">
+      {/* 🌸 라이트 모드: 벚꽃 / 🎆 다크 모드: 폭죽 */}
+      <SeasonalEffects />
+
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
+      <section className="relative z-10 overflow-hidden">
         {/* Soft gradient background */}
         <div className="absolute inset-0 bg-gradient-to-b from-pink-50/80 via-white to-white dark:from-fuchsia-950/40 dark:via-[#1a0f1a] dark:to-[#1a0f1a]" />
         <div className="absolute inset-0 overflow-hidden">
@@ -125,7 +129,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 sm:py-28">
+      <section className="relative z-10 py-20 sm:py-28">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-800 dark:text-zinc-100 sm:text-3xl">
@@ -159,7 +163,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="mx-4 mb-16 sm:mx-6 lg:mx-auto lg:max-w-5xl">
+      <section className="relative z-10 mx-4 mb-16 sm:mx-6 lg:mx-auto lg:max-w-5xl">
         <div className="rounded-3xl bg-gradient-to-r from-pink-50 to-rose-50 dark:from-fuchsia-950/40 dark:to-rose-950/30 px-6 py-14 text-center sm:px-12">
           <h2 className="text-2xl font-bold text-gray-700 dark:text-zinc-100 sm:text-3xl">
             지금 바로 시작하세요
@@ -178,7 +182,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-100 dark:border-fuchsia-900/30 py-8">
+      <footer className="relative z-10 border-t border-gray-100 dark:border-fuchsia-900/30 py-8 bg-white/80 dark:bg-[#1a0f1a]/80 backdrop-blur-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <div className="flex items-baseline gap-1.5">
