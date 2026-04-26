@@ -63,6 +63,10 @@ export default function NewsPage() {
   const [showSummaryKo, setShowSummaryKo] = useState(false);
   const [summaryTranslation, setSummaryTranslation] = useState<string | null>(null);
   const [translateError, setTranslateError] = useState<string | null>(null);
+
+  const [titleTranslation, setTitleTranslation] = useState<string | null>(null);
+  const [titleTranslating, setTitleTranslating] = useState(false);
+  const [titleTranslateError, setTitleTranslateError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
   const PAGE_SIZE = 10;
@@ -132,6 +136,43 @@ export default function NewsPage() {
     }
   };
 
+  const handleTitleTranslate = async () => {
+    if (!selectedLive || titleTranslating) return;
+    // 토글: 이미 결과가 있으면 숨기기
+    if (titleTranslation) {
+      setTitleTranslation(null);
+      setTitleTranslateError(null);
+      return;
+    }
+    setTitleTranslating(true);
+    setTitleTranslateError(null);
+    try {
+      const res = await fetch("/api/ai/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: selectedLive.title }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        const msg =
+          data.error === "API key not configured"
+            ? "AI 번역 기능이 설정되지 않았습니다. (GROQ_API_KEY 환경변수 필요)"
+            : data.error || "번역에 실패했습니다.";
+        setTitleTranslateError(msg);
+        return;
+      }
+      if (!data.translation) {
+        setTitleTranslateError("번역 결과가 비어 있습니다.");
+        return;
+      }
+      setTitleTranslation(data.translation);
+    } catch {
+      setTitleTranslateError("네트워크 오류로 번역에 실패했습니다.");
+    } finally {
+      setTitleTranslating(false);
+    }
+  };
+
   const toggleSummaryTranslation = () => {
     if (!selectedLive) return;
     if (showSummaryKo) {
@@ -191,7 +232,7 @@ export default function NewsPage() {
             /* 기사 상세 */
             <div>
               <button
-                onClick={() => { setSelectedLive(null); setAiTranslation(null); setShowSummaryKo(false); setSummaryTranslation(null); setTranslateError(null); }}
+                onClick={() => { setSelectedLive(null); setAiTranslation(null); setShowSummaryKo(false); setSummaryTranslation(null); setTranslateError(null); setTitleTranslation(null); setTitleTranslateError(null); }}
                 className="text-indigo-600 dark:text-indigo-400 hover:underline text-sm mb-4 block"
               >← 목록으로</button>
 
@@ -205,12 +246,50 @@ export default function NewsPage() {
                   </span>
                 </div>
 
-                <h2 className="text-xl font-bold mb-4 dark:text-zinc-50 leading-relaxed">{selectedLive.title}</h2>
+                <h2 className="text-xl font-bold mb-2 dark:text-zinc-50 leading-relaxed">{selectedLive.title}</h2>
+
+                {/* 제목 번역 결과 (인라인) */}
+                {titleTranslating && (
+                  <div className="mb-3 flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
+                    <Loader2 size={14} className="animate-spin" />
+                    제목 번역 중...
+                  </div>
+                )}
+                {titleTranslateError && (
+                  <div className="mb-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 px-3 py-2 text-xs text-red-700 dark:text-red-300 flex items-center justify-between gap-2">
+                    <span>{titleTranslateError}</span>
+                    <button
+                      onClick={handleTitleTranslate}
+                      className="shrink-0 px-2 py-0.5 bg-red-100 hover:bg-red-200 dark:bg-red-900/40 dark:hover:bg-red-900/60 rounded font-medium"
+                    >
+                      재시도
+                    </button>
+                  </div>
+                )}
+                {titleTranslation && !titleTranslateError && (
+                  <p className="mb-4 text-sm text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-300 dark:border-blue-600 px-3 py-2 rounded-r-lg">
+                    <span className="text-[10px] font-medium text-blue-500 dark:text-blue-400 mr-1">✨ AI 번역</span>
+                    {titleTranslation}
+                  </p>
+                )}
 
                 {/* 제목 TTS */}
                 <div className="flex flex-wrap gap-2 mb-4">
                   <button onClick={() => speakJapanese(selectedLive.title)} className="px-3 py-1.5 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 rounded-lg text-sm flex items-center gap-1">
                     <Volume2 size={14} /> 제목 듣기
+                  </button>
+                  <button
+                    onClick={handleTitleTranslate}
+                    disabled={titleTranslating}
+                    className="px-3 py-1.5 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 rounded-lg text-sm flex items-center gap-1 disabled:opacity-50"
+                  >
+                    {titleTranslating ? (
+                      <><Loader2 size={14} className="animate-spin" /> 번역 중...</>
+                    ) : titleTranslation ? (
+                      <><EyeOff size={14} /> 제목 번역 숨기기</>
+                    ) : (
+                      <><Eye size={14} /> 제목 번역 ✨</>
+                    )}
                   </button>
                   <button
                     onClick={toggleSummaryTranslation}
@@ -219,15 +298,15 @@ export default function NewsPage() {
                   >
                     {translating ? (
                       <>
-                        <Loader2 size={14} className="animate-spin" /> AI 번역 중...
+                        <Loader2 size={14} className="animate-spin" /> 번역 중...
                       </>
                     ) : showSummaryKo ? (
                       <>
-                        <EyeOff size={14} /> 번역 숨기기
+                        <EyeOff size={14} /> 본문 번역 숨기기
                       </>
                     ) : (
                       <>
-                        <Eye size={14} /> 번역 보기 ✨
+                        <Eye size={14} /> 본문 번역 ✨
                       </>
                     )}
                   </button>
@@ -369,7 +448,7 @@ export default function NewsPage() {
                     {pagedArticles.map((article) => (
                       <button
                         key={article.id}
-                        onClick={() => { setSelectedLive(article); setAiTranslation(null); setShowSummaryKo(false); setSummaryTranslation(null); setTranslateError(null); }}
+                        onClick={() => { setSelectedLive(article); setAiTranslation(null); setShowSummaryKo(false); setSummaryTranslation(null); setTranslateError(null); setTitleTranslation(null); setTitleTranslateError(null); }}
                         className="bg-white border rounded-xl p-5 text-left hover:shadow-md hover:border-indigo-200 transition-all dark:bg-zinc-800 dark:border-zinc-700 dark:hover:border-indigo-500"
                       >
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
