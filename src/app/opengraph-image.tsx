@@ -1,7 +1,5 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
-
 export const alt = "Kyma · 한국인을 위한 일본어 학습 플랫폼";
 export const size = {
   width: 1200,
@@ -22,14 +20,16 @@ async function loadFont(weight: 400 | 700 | 900): Promise<ArrayBuffer | null> {
       `&text=${encodeURIComponent(GLYPHS)}&display=swap`;
     const css = await fetch(cssUrl, {
       headers: {
-        // Modern browser UA returns woff2 + a single src URL (no unicode-range fragmentation).
         "User-Agent":
           "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       },
-    }).then((r) => r.text());
+    }).then((r) => (r.ok ? r.text() : null));
+    if (!css) return null;
     const match = css.match(/src:\s*url\(([^)]+)\)/);
     if (!match) return null;
-    return await fetch(match[1]).then((r) => r.arrayBuffer());
+    const fontRes = await fetch(match[1]);
+    if (!fontRes.ok) return null;
+    return await fontRes.arrayBuffer();
   } catch (err) {
     console.error(`[opengraph-image] font load failed (weight=${weight})`, err);
     return null;
@@ -37,18 +37,39 @@ async function loadFont(weight: 400 | 700 | 900): Promise<ArrayBuffer | null> {
 }
 
 export default async function Image() {
-  const [regular, bold, black] = await Promise.all([
-    loadFont(400),
-    loadFont(700),
-    loadFont(900),
-  ]);
+  let regular: ArrayBuffer | null = null;
+  let bold: ArrayBuffer | null = null;
+  let black: ArrayBuffer | null = null;
 
-  // Only include fonts that loaded successfully; ImageResponse will fall back
-  // to the system font for missing weights instead of erroring out.
+  try {
+    [regular, bold, black] = await Promise.all([
+      loadFont(400),
+      loadFont(700),
+      loadFont(900),
+    ]);
+  } catch (err) {
+    console.error("[opengraph-image] failed to load fonts", err);
+  }
+
   const fonts = [
-    regular && { name: "Noto Sans KR", data: regular, weight: 400 as const, style: "normal" as const },
-    bold && { name: "Noto Sans KR", data: bold, weight: 700 as const, style: "normal" as const },
-    black && { name: "Noto Sans KR", data: black, weight: 900 as const, style: "normal" as const },
+    regular && {
+      name: "Noto Sans KR",
+      data: regular,
+      weight: 400 as const,
+      style: "normal" as const,
+    },
+    bold && {
+      name: "Noto Sans KR",
+      data: bold,
+      weight: 700 as const,
+      style: "normal" as const,
+    },
+    black && {
+      name: "Noto Sans KR",
+      data: black,
+      weight: 900 as const,
+      style: "normal" as const,
+    },
   ].filter((f): f is NonNullable<typeof f> => f !== null);
 
   return new ImageResponse(
@@ -64,7 +85,7 @@ export default async function Image() {
             "linear-gradient(135deg, #fff5f7 0%, #ffe4ec 35%, #fce7f3 70%, #f9d4e2 100%)",
           padding: "70px 80px",
           position: "relative",
-          fontFamily: "Noto Sans KR",
+          fontFamily: fonts.length > 0 ? "Noto Sans KR" : "sans-serif",
         }}
       >
         {/* Decorative blur orbs */}
@@ -90,18 +111,6 @@ export default async function Image() {
             borderRadius: "50%",
             background:
               "radial-gradient(circle, rgba(192,132,252,0.35) 0%, transparent 70%)",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            top: 200,
-            left: 600,
-            width: 280,
-            height: 280,
-            borderRadius: "50%",
-            background:
-              "radial-gradient(circle, rgba(251,207,232,0.6) 0%, transparent 70%)",
           }}
         />
 
@@ -133,7 +142,6 @@ export default async function Image() {
               marginLeft: "auto",
               display: "flex",
               alignItems: "center",
-              gap: 10,
               padding: "12px 22px",
               borderRadius: 999,
               background: "rgba(255, 255, 255, 0.85)",
@@ -180,7 +188,6 @@ export default async function Image() {
               fontSize: 30,
               color: "#6b7280",
               lineHeight: 1.5,
-              maxWidth: 900,
               fontWeight: 400,
               display: "flex",
               flexDirection: "column",
@@ -201,7 +208,7 @@ export default async function Image() {
         >
           <div style={{ display: "flex", gap: 12 }}>
             {[
-              { label: "1,500+ 단어", color: "#fce7f3" },
+              { label: "1500+ 단어", color: "#fce7f3" },
               { label: "200+ 문법", color: "#ede9fe" },
               { label: "AI 회화", color: "#fef3c7" },
               { label: "NHK 뉴스", color: "#dbeafe" },
@@ -237,7 +244,7 @@ export default async function Image() {
     ),
     {
       ...size,
-      fonts: fonts.length > 0 ? fonts : undefined,
+      ...(fonts.length > 0 ? { fonts } : {}),
     }
   );
 }
