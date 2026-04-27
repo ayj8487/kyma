@@ -9,21 +9,31 @@ export const size = {
 };
 export const contentType = "image/png";
 
-// Load Korean fonts from Google Fonts at request time so the OG image can
-// actually render Hangul (the default Edge runtime fonts can't).
-async function loadFont(weight: 400 | 700 | 900): Promise<ArrayBuffer> {
-  const cssUrl = `https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@${weight}&display=swap`;
-  const css = await fetch(cssUrl, {
-    headers: {
-      // Force the User-Agent that returns woff2 + extracts the font URL clearly.
-      "User-Agent":
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    },
-  }).then((r) => r.text());
-  const match = css.match(/src:\s*url\(([^)]+)\)\s+format\('(?:opentype|truetype|woff2)'\)/);
-  if (!match) throw new Error("Could not parse Noto Sans KR font URL from CSS");
-  const fontUrl = match[1];
-  return await fetch(fontUrl).then((r) => r.arrayBuffer());
+// Only the characters we actually render in the OG image.
+// Using `text=` makes Google return a single, tiny woff2 with just these glyphs.
+const GLYPHS =
+  "Kymakymanovacom일본어매매일즐겁게배우자히라가나단문법회화AI뉴스" +
+  "한국인을위한플랫폼학습허브1500200N5N4N3N2N1きょうま+0123456789";
+
+async function loadFont(weight: 400 | 700 | 900): Promise<ArrayBuffer | null> {
+  try {
+    const cssUrl =
+      `https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@${weight}` +
+      `&text=${encodeURIComponent(GLYPHS)}&display=swap`;
+    const css = await fetch(cssUrl, {
+      headers: {
+        // Modern browser UA returns woff2 + a single src URL (no unicode-range fragmentation).
+        "User-Agent":
+          "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      },
+    }).then((r) => r.text());
+    const match = css.match(/src:\s*url\(([^)]+)\)/);
+    if (!match) return null;
+    return await fetch(match[1]).then((r) => r.arrayBuffer());
+  } catch (err) {
+    console.error(`[opengraph-image] font load failed (weight=${weight})`, err);
+    return null;
+  }
 }
 
 export default async function Image() {
@@ -32,6 +42,14 @@ export default async function Image() {
     loadFont(700),
     loadFont(900),
   ]);
+
+  // Only include fonts that loaded successfully; ImageResponse will fall back
+  // to the system font for missing weights instead of erroring out.
+  const fonts = [
+    regular && { name: "Noto Sans KR", data: regular, weight: 400 as const, style: "normal" as const },
+    bold && { name: "Noto Sans KR", data: bold, weight: 700 as const, style: "normal" as const },
+    black && { name: "Noto Sans KR", data: black, weight: 900 as const, style: "normal" as const },
+  ].filter((f): f is NonNullable<typeof f> => f !== null);
 
   return new ImageResponse(
     (
@@ -219,11 +237,7 @@ export default async function Image() {
     ),
     {
       ...size,
-      fonts: [
-        { name: "Noto Sans KR", data: regular, weight: 400, style: "normal" },
-        { name: "Noto Sans KR", data: bold, weight: 700, style: "normal" },
-        { name: "Noto Sans KR", data: black, weight: 900, style: "normal" },
-      ],
+      fonts: fonts.length > 0 ? fonts : undefined,
     }
   );
 }
