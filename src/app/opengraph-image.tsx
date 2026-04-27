@@ -1,5 +1,10 @@
 import { ImageResponse } from "next/og";
 
+// Generate at request time, never at build time (avoids fetching fonts during build).
+export const dynamic = "force-dynamic";
+// Cache the result for 24h once generated.
+export const revalidate = 86400;
+
 export const alt = "Kyma · 한국인을 위한 일본어 학습 플랫폼";
 export const size = {
   width: 1200,
@@ -7,29 +12,19 @@ export const size = {
 };
 export const contentType = "image/png";
 
-// Only the characters we actually render in the OG image.
-// Using `text=` makes Google return a single, tiny woff2 with just these glyphs.
-const GLYPHS =
-  "Kymakymanovacom일본어매매일즐겁게배우자히라가나단문법회화AI뉴스" +
-  "한국인을위한플랫폼학습허브1500200N5N4N3N2N1きょうま+0123456789";
+// Satori (the renderer behind next/og) does NOT support WOFF2.
+// We fetch raw TTF files from the official Noto CJK GitHub repo.
+const FONT_URLS = {
+  400: "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/SubsetTTF/KR/NotoSansKR-Regular.ttf",
+  700: "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/SubsetTTF/KR/NotoSansKR-Bold.ttf",
+  900: "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/SubsetTTF/KR/NotoSansKR-Black.ttf",
+} as const;
 
 async function loadFont(weight: 400 | 700 | 900): Promise<ArrayBuffer | null> {
   try {
-    const cssUrl =
-      `https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@${weight}` +
-      `&text=${encodeURIComponent(GLYPHS)}&display=swap`;
-    const css = await fetch(cssUrl, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-      },
-    }).then((r) => (r.ok ? r.text() : null));
-    if (!css) return null;
-    const match = css.match(/src:\s*url\(([^)]+)\)/);
-    if (!match) return null;
-    const fontRes = await fetch(match[1]);
-    if (!fontRes.ok) return null;
-    return await fontRes.arrayBuffer();
+    const res = await fetch(FONT_URLS[weight]);
+    if (!res.ok) return null;
+    return await res.arrayBuffer();
   } catch (err) {
     console.error(`[opengraph-image] font load failed (weight=${weight})`, err);
     return null;
@@ -37,19 +32,11 @@ async function loadFont(weight: 400 | 700 | 900): Promise<ArrayBuffer | null> {
 }
 
 export default async function Image() {
-  let regular: ArrayBuffer | null = null;
-  let bold: ArrayBuffer | null = null;
-  let black: ArrayBuffer | null = null;
-
-  try {
-    [regular, bold, black] = await Promise.all([
-      loadFont(400),
-      loadFont(700),
-      loadFont(900),
-    ]);
-  } catch (err) {
-    console.error("[opengraph-image] failed to load fonts", err);
-  }
+  const [regular, bold, black] = await Promise.all([
+    loadFont(400),
+    loadFont(700),
+    loadFont(900),
+  ]);
 
   const fonts = [
     regular && {
