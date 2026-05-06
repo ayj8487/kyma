@@ -436,6 +436,30 @@ export default function CameraPage() {
     await analyzeWithAI(text);
   };
 
+  /**
+   * Smart "Camera" button:
+   * - On mobile devices, open the native camera app (more reliable, no black-screen issue)
+   * - On desktop/tablet, start the in-page live preview (zoom available)
+   *
+   * The in-page live preview also tries to start on tablets but falls back to
+   * the native picker via cameraError flow if getUserMedia fails.
+   */
+  const handleCameraButton = () => {
+    const isMobile =
+      typeof window !== "undefined" &&
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(
+        navigator.userAgent
+      );
+
+    if (isMobile) {
+      // Native camera app — most stable on mobile
+      fileInputRef.current?.click();
+    } else {
+      // Live preview with zoom — desktop experience
+      startCamera();
+    }
+  };
+
   const isBookmarked = (word: string) => bookmarks.includes(`word:${word}`);
 
   const handleZoom = (dir: "in" | "out") => {
@@ -609,31 +633,30 @@ export default function CameraPage() {
               <p className="text-gray-400 dark:text-gray-500 text-sm">카메라로 일본어 텍스트를 촬영하면<br />AI가 번역해 드립니다</p>
               <p className="text-xs text-gray-300 dark:text-gray-600 mt-2">인쇄된 글자, 간판, 메뉴판 등</p>
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <button
-                onClick={startCamera}
+                onClick={handleCameraButton}
                 disabled={cameraStarting}
-                className="px-2 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm"
+                aria-label="카메라로 사진 찍기"
+                className="px-3 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base font-medium"
               >
-                {cameraStarting ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
+                {cameraStarting ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <Camera size={18} />
+                )}
                 <span>카메라</span>
               </button>
               <button
-                onClick={() => fileInputRef.current?.click()}
-                className="px-2 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm"
-              >
-                <Camera size={18} />
-                <span>촬영</span>
-              </button>
-              <button
                 onClick={() => galleryInputRef.current?.click()}
-                className="px-2 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm"
+                aria-label="갤러리에서 사진 선택"
+                className="px-3 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center gap-2 text-sm sm:text-base font-medium"
               >
                 <ImageIcon size={18} />
                 <span>갤러리</span>
               </button>
             </div>
-            {/* "촬영" uses native camera capture (mobile fallback if live preview fails) */}
+            {/* Hidden native-camera input — opened from handleCameraButton on mobile */}
             <input
               ref={fileInputRef}
               type="file"
@@ -642,6 +665,7 @@ export default function CameraPage() {
               onChange={handleFileUpload}
               className="hidden"
             />
+            {/* Hidden gallery picker — opened from "갤러리" button */}
             <input
               ref={galleryInputRef}
               type="file"
@@ -653,7 +677,7 @@ export default function CameraPage() {
               <p className="text-red-500 text-sm mt-3">{cameraError}</p>
             )}
             <p className="text-xs text-gray-400 mt-3">
-              💡 모바일에서 라이브 카메라가 안 되면 <strong>&quot;촬영&quot;</strong> 버튼을 사용하세요 (네이티브 카메라 앱 호출)
+              💡 <strong>카메라</strong>는 새 사진을 찍고, <strong>갤러리</strong>는 저장된 사진을 가져옵니다
             </p>
           </div>
         ) : (
