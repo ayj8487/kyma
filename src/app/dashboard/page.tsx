@@ -14,9 +14,12 @@ import {
   Sparkles,
   Camera,
   Bell,
+  PlayCircle,
+  RotateCcw,
 } from "lucide-react";
 import { useRef, useState, useCallback } from "react";
 import { useStudyStore } from "@/store/useStudyStore";
+import { useAuth } from "@/components/AuthProvider";
 
 const quickAccessCards = [
   {
@@ -239,11 +242,13 @@ const getDayIndex = () => {
 };
 
 export default function DashboardPage() {
+  const { user } = useAuth();
   const {
     progress,
     streakCount,
     todayStudyCount,
     todayDate,
+    dailyGoal,
     getCorrectRate,
     getDueItems,
   } = useStudyStore();
@@ -273,9 +278,6 @@ export default function DashboardPage() {
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
   }, []);
-
-  const today = new Date().toISOString().split("T")[0];
-  const displayStudyCount = todayDate === today ? todayStudyCount : 0;
 
   const kanaEntries = Object.values(progress).filter(
     (p) => p.contentType === "hiragana" || p.contentType === "katakana"
@@ -320,9 +322,126 @@ export default function DashboardPage() {
     },
   ];
 
+  const today = new Date().toISOString().split("T")[0];
+  const todayCount = todayDate === today ? todayStudyCount : 0;
+  const displayStudyCount = todayCount;
+  const goalProgress = Math.min(100, Math.round((todayCount / dailyGoal) * 100));
+  const goalReached = todayCount >= dailyGoal;
+  const userName = user?.name || (user?.email ? user.email.split("@")[0] : null);
+  const greeting = (() => {
+    const h = new Date().getHours();
+    if (h < 6) return "늦은 시간까지 화이팅";
+    if (h < 12) return "좋은 아침이에요";
+    if (h < 18) return "오늘도 화이팅";
+    return "수고 많으셨어요";
+  })();
+  const hasKanaProgress = Object.values(progress).some(
+    (p) => p.contentType === "hiragana" || p.contentType === "katakana"
+  );
+  const hasWordProgress = Object.values(progress).some(
+    (p) => p.contentType === "word"
+  );
+  const resumeHref =
+    dueItems.length > 0
+      ? "/review"
+      : !hasKanaProgress
+        ? "/kana/hiragana"
+        : !hasWordProgress
+          ? "/words/N5"
+          : "/review";
+
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* 로그인 사용자 환영 카드 */}
+        {user && (
+          <div className="mb-6 rounded-2xl border border-sakura-200 bg-gradient-to-br from-sakura-50 via-white to-warm-50 p-5 sm:p-6 dark:border-sakura-300 dark:from-sakura-100 dark:via-warm-50 dark:to-warm-100">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs text-sakura-500 font-medium">{greeting}</span>
+                  {streakCount > 0 && (
+                    <span className="flex items-center gap-1 rounded-full bg-orange-100 dark:bg-orange-900/40 px-2 py-0.5 text-[10px] font-semibold text-orange-700 dark:text-orange-300">
+                      <Flame size={11} className="fill-orange-500 text-orange-500" />
+                      {streakCount}일 연속
+                    </span>
+                  )}
+                </div>
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground truncate">
+                  {userName}님 🌸
+                </h2>
+                <p className="mt-1 text-sm text-accent-indigo dark:text-warm-400">
+                  {goalReached
+                    ? `오늘 목표 달성! 멋져요 (${todayCount}/${dailyGoal})`
+                    : todayCount === 0
+                      ? `오늘 학습을 시작해보세요 (목표 ${dailyGoal}회)`
+                      : `오늘 ${todayCount}/${dailyGoal}회 학습 중`}
+                </p>
+
+                {/* 진행 바 */}
+                <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-warm-200 dark:bg-warm-200">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      goalReached
+                        ? "bg-gradient-to-r from-emerald-400 to-green-500"
+                        : "bg-gradient-to-r from-sakura-400 to-rose-400"
+                    }`}
+                    style={{ width: `${goalProgress}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex sm:flex-col gap-2 shrink-0">
+                <Link
+                  href={resumeHref}
+                  className="flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-sakura-500 to-rose-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg active:scale-[0.97] transition-all"
+                >
+                  {dueItems.length > 0 ? <RotateCcw size={16} /> : <PlayCircle size={16} />}
+                  {dueItems.length > 0 ? `복습 ${dueItems.length}개` : "이어서 학습"}
+                </Link>
+                <Link
+                  href="/goals"
+                  className="flex items-center justify-center gap-1.5 rounded-xl border border-warm-300 bg-white dark:bg-warm-50 px-4 py-2.5 text-sm font-medium text-foreground hover:bg-warm-50 dark:hover:bg-warm-100 transition-colors"
+                >
+                  <Target size={15} />
+                  목표
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 비로그인 사용자: 가입 유도 */}
+        {!user && (
+          <div className="mb-6 rounded-2xl border border-sakura-200 bg-gradient-to-br from-sakura-50 to-warm-50 p-5 sm:p-6 dark:border-sakura-300 dark:from-sakura-100 dark:to-warm-100">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <h2 className="text-lg sm:text-xl font-bold text-foreground">
+                  학습 데이터를 모든 기기에서 동기화하세요 🌸
+                </h2>
+                <p className="mt-1 text-sm text-accent-indigo dark:text-warm-400">
+                  무료 회원가입 후 진도, 북마크, 퀴즈 기록을 안전하게 보관하세요
+                </p>
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <Link
+                  href="/register"
+                  className="flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-sakura-500 to-rose-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg active:scale-[0.97] transition-all"
+                >
+                  회원가입
+                  <ArrowRight size={15} />
+                </Link>
+                <Link
+                  href="/login"
+                  className="flex items-center justify-center rounded-xl border border-warm-300 bg-white dark:bg-warm-50 px-4 py-2.5 text-sm font-medium text-foreground hover:bg-warm-50 dark:hover:bg-warm-100 transition-colors"
+                >
+                  로그인
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* 今日の名言 */}
         {(() => {
           const idx = getDayIndex();
