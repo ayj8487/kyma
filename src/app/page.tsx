@@ -240,19 +240,6 @@ export default function Home() {
                 </li>
                 <li>
                   <a
-                    href="https://github.com/ayj8487/kyma"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-600 dark:text-zinc-300 hover:text-pink-500 transition-colors flex items-center gap-1"
-                  >
-                    GitHub
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                  </a>
-                </li>
-                <li>
-                  <a
                     href="mailto:960921@gmail.com"
                     className="text-gray-600 dark:text-zinc-300 hover:text-pink-500 transition-colors"
                   >
@@ -263,11 +250,8 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="border-t border-gray-100 dark:border-fuchsia-900/30 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-400">
+          <div className="border-t border-gray-100 dark:border-fuchsia-900/30 pt-6 text-center text-xs text-gray-400">
             <p>&copy; {new Date().getFullYear()} Kyma. Made by AnYoungJun.</p>
-            <p className="text-gray-300 dark:text-zinc-600">
-              Built with Next.js · Hosted on Vercel
-            </p>
           </div>
         </div>
       </footer>
