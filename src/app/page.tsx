@@ -182,17 +182,91 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-gray-100 dark:border-fuchsia-900/30 py-8 bg-white/80 dark:bg-[#1a0f1a]/80 backdrop-blur-sm">
+      <footer className="relative z-10 border-t border-gray-100 dark:border-fuchsia-900/30 py-10 bg-white/80 dark:bg-[#1a0f1a]/80 backdrop-blur-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-lg font-bold text-pink-400">Kyma</span>
-              <span className="text-xs text-gray-400">
-                きょうま
-              </span>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-8">
+            {/* Brand */}
+            <div>
+              <div className="flex items-baseline gap-1.5 mb-2">
+                <span className="text-xl font-bold text-pink-400">Kyma</span>
+                <span className="text-sm text-gray-400">きょうま</span>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-zinc-500 leading-relaxed">
+                한국인을 위한 일본어 학습 플랫폼.
+                <br />
+                매일매일 즐겁게 일본어를 배워보세요.
+              </p>
             </div>
-            <p className="text-sm text-gray-400">
-              &copy; {new Date().getFullYear()} Kyma. AnYoungJun. All rights reserved.
+
+            {/* Quick Links */}
+            <div>
+              <h3 className="text-xs font-semibold text-gray-400 dark:text-zinc-400 mb-3">
+                바로가기
+              </h3>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link href="/dashboard" className="text-gray-600 dark:text-zinc-300 hover:text-pink-500 transition-colors">
+                    대시보드
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/words" className="text-gray-600 dark:text-zinc-300 hover:text-pink-500 transition-colors">
+                    단어 학습
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/ai/conversation" className="text-gray-600 dark:text-zinc-300 hover:text-pink-500 transition-colors">
+                    AI 회화
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Legal & Contact */}
+            <div>
+              <h3 className="text-xs font-semibold text-gray-400 dark:text-zinc-400 mb-3">
+                정보
+              </h3>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link href="/privacy" className="text-gray-600 dark:text-zinc-300 hover:text-pink-500 transition-colors">
+                    개인정보처리방침
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/terms" className="text-gray-600 dark:text-zinc-300 hover:text-pink-500 transition-colors">
+                    이용약관
+                  </Link>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/ayj8487/kyma"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-600 dark:text-zinc-300 hover:text-pink-500 transition-colors flex items-center gap-1"
+                  >
+                    GitHub
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="mailto:960921@gmail.com"
+                    className="text-gray-600 dark:text-zinc-300 hover:text-pink-500 transition-colors"
+                  >
+                    문의하기
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-100 dark:border-fuchsia-900/30 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-400">
+            <p>&copy; {new Date().getFullYear()} Kyma. Made by AnYoungJun.</p>
+            <p className="text-gray-300 dark:text-zinc-600">
+              Built with Next.js · Hosted on Vercel
             </p>
           </div>
         </div>

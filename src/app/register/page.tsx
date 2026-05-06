@@ -25,6 +25,7 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [agreed, setAgreed] = useState(false);
 
   const validateEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
@@ -106,6 +107,10 @@ export default function RegisterPage() {
     }
     if (password !== confirmPassword) {
       setError("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+    if (!agreed) {
+      setError("이용약관과 개인정보처리방침에 동의해주세요.");
       return;
     }
 
@@ -265,6 +270,22 @@ export default function RegisterPage() {
                 </div>
               </div>
 
+              {/* Terms & Privacy consent */}
+              <label className="flex items-start gap-2 cursor-pointer text-xs text-foreground select-none">
+                <input
+                  type="checkbox"
+                  checked={agreed}
+                  onChange={(e) => setAgreed(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-warm-300 text-sakura-500 focus:ring-sakura-300"
+                />
+                <span className="leading-relaxed">
+                  <Link href="/terms" target="_blank" className="font-semibold text-sakura-500 hover:underline">이용약관</Link>
+                  {" 및 "}
+                  <Link href="/privacy" target="_blank" className="font-semibold text-sakura-500 hover:underline">개인정보처리방침</Link>
+                  에 동의합니다 <span className="text-red-500">*</span>
+                </span>
+              </label>
+
               {info && !error && (
                 <div className="rounded-lg bg-green-50 p-3 text-sm text-green-700 dark:bg-green-950/30 dark:text-green-400">
                   {info}
@@ -278,8 +299,8 @@ export default function RegisterPage() {
 
               <button
                 type="submit"
-                disabled={isLoading || !codeSent}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sakura-500 to-sakura-600 py-3 font-semibold text-white transition-all hover:from-sakura-600 hover:to-sakura-700 disabled:opacity-50"
+                disabled={isLoading || !codeSent || !agreed}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sakura-500 to-sakura-600 py-3 font-semibold text-white transition-all hover:from-sakura-600 hover:to-sakura-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
