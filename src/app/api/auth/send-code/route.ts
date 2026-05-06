@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createHash, randomInt } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { sendVerificationCode } from "@/lib/email";
+import { checkRateLimit, getClientId, rateLimitResponse } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -13,6 +14,16 @@ function hashCode(code: string): string {
 }
 
 export async function POST(req: NextRequest) {
+  // Rate limit: 5 send-code requests per 5 minutes per IP (anti-abuse)
+  const ip = getClientId(req);
+  const rl = await checkRateLimit(`send-code:${ip}`, 5, 300);
+  if (!rl.ok) {
+    return rateLimitResponse(
+      rl,
+      `인증 코드 발송 한도를 초과했습니다. ${rl.resetIn}초 후에 다시 시도해주세요.`
+    );
+  }
+
   try {
     const body = await req.json();
     const email = (body?.email as string | undefined)?.trim().toLowerCase();

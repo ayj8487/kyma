@@ -69,6 +69,8 @@ model UserProgress {
   user User @relation(fields: [userId], references: [id])
 
   @@unique([userId, contentType, contentId])
+  @@index([userId])
+  @@index([userId, nextReviewAt])
 }
 
 model QuizAttempt {
@@ -83,6 +85,8 @@ model QuizAttempt {
   createdAt      DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
 }
 
 model Bookmark {
@@ -95,6 +99,7 @@ model Bookmark {
   user User @relation(fields: [userId], references: [id])
 
   @@unique([userId, contentType, contentId])
+  @@index([userId])
 }
 
 model EmailVerificationCode {
@@ -106,4 +111,16 @@ model EmailVerificationCode {
   createdAt DateTime @default(now())
 
   @@index([email])
+  @@index([expiresAt])
+}
+
+model RateLimit {
+  id        String   @id @default(cuid())
+  key       String   @unique // e.g. "login:1.2.3.4" or "send-code:user@example.com"
+  count     Int      @default(1)
+  windowEnd DateTime // when the current window expires; older windows are cleaned up
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([windowEnd])
 }

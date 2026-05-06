@@ -1,6 +1,8 @@
 import { createGroq } from "@ai-sdk/groq";
 import { generateObject } from "ai";
 import { z } from "zod";
+import type { NextRequest } from "next/server";
+import { checkRateLimit, getClientId, rateLimitResponse } from "@/lib/rate-limit";
 
 export const maxDuration = 30;
 
@@ -51,7 +53,17 @@ const SYSTEM_PROMPT = `당신은 일본어 문법 교정 전문가입니다. 한
 입력: "私は日本語を勉強したい"
 → isCorrect: true, corrected: "私は日本語を勉強したいです", corrections: [{ type: "표현", original: "勉強したい", corrected: "勉強したいです", explanation: "정중한 표현으로 です를 붙이는 것이 자연스럽습니다" }], level: "N4"`;
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  // Rate limit: 20 AI calls per minute per IP
+  const ip = getClientId(req);
+  const rl = await checkRateLimit(`ai:${ip}`, 20, 60);
+  if (!rl.ok) {
+    return rateLimitResponse(
+      rl,
+      `AI 요청이 너무 많습니다. ${rl.resetIn}초 후에 다시 시도해주세요.`
+    );
+  }
+
   if (!process.env.GROQ_API_KEY) {
     return Response.json({ error: "API key not configured" }, { status: 500 });
   }

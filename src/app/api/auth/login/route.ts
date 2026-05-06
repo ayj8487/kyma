@@ -6,10 +6,21 @@ import {
   SESSION_COOKIE,
   SESSION_MAX_AGE,
 } from "@/lib/auth-server";
+import { checkRateLimit, getClientId, rateLimitResponse } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
+  // Rate limit: 5 attempts per minute per IP (brute-force protection)
+  const ip = getClientId(req);
+  const rl = await checkRateLimit(`login:${ip}`, 5, 60);
+  if (!rl.ok) {
+    return rateLimitResponse(
+      rl,
+      `로그인 시도가 너무 많습니다. ${rl.resetIn}초 후에 다시 시도해주세요.`
+    );
+  }
+
   try {
     const body = await req.json();
     const { email, password } = body as {

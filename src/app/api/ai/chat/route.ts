@@ -1,5 +1,7 @@
 import { createGroq } from "@ai-sdk/groq";
 import { generateText } from "ai";
+import type { NextRequest } from "next/server";
+import { checkRateLimit, getClientId, rateLimitResponse } from "@/lib/rate-limit";
 
 export const maxDuration = 30;
 
@@ -7,7 +9,17 @@ const groq = createGroq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  // Rate limit: 20 AI calls per minute per IP
+  const ip = getClientId(req);
+  const rl = await checkRateLimit(`ai:${ip}`, 20, 60);
+  if (!rl.ok) {
+    return rateLimitResponse(
+      rl,
+      `AI 요청이 너무 많습니다. ${rl.resetIn}초 후에 다시 시도해주세요.`
+    );
+  }
+
   if (!process.env.GROQ_API_KEY) {
     return new Response("Groq API key is not configured", { status: 500 });
   }

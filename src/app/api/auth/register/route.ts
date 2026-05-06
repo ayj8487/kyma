@@ -7,6 +7,7 @@ import {
   SESSION_COOKIE,
   SESSION_MAX_AGE,
 } from "@/lib/auth-server";
+import { checkRateLimit, getClientId, rateLimitResponse } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -17,6 +18,16 @@ function hashCode(code: string): string {
 }
 
 export async function POST(req: NextRequest) {
+  // Rate limit: 3 register attempts per minute per IP
+  const ip = getClientId(req);
+  const rl = await checkRateLimit(`register:${ip}`, 3, 60);
+  if (!rl.ok) {
+    return rateLimitResponse(
+      rl,
+      `회원가입 시도가 너무 많습니다. ${rl.resetIn}초 후에 다시 시도해주세요.`
+    );
+  }
+
   try {
     const body = await req.json();
     const { name, email, password, code } = body as {
