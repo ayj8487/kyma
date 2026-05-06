@@ -112,13 +112,6 @@ export function Navbar() {
     return `${Math.floor(hours / 24)}일 전 동기화`;
   };
 
-  const cycleTheme = () => {
-    const order = ["light", "dark", "system"] as const;
-    const next = order[(order.indexOf(theme) + 1) % 3];
-    setTheme(next);
-    applyTheme(next);
-  };
-
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen((prev) => !prev);
   };

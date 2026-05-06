@@ -58,7 +58,6 @@ export default function NewsPage() {
   const [liveError, setLiveError] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [selectedLive, setSelectedLive] = useState<LiveArticle | null>(null);
-  const [aiTranslation, setAiTranslation] = useState<string | null>(null);
   const [translating, setTranslating] = useState(false);
   const [showSummaryKo, setShowSummaryKo] = useState(false);
   const [summaryTranslation, setSummaryTranslation] = useState<string | null>(null);
@@ -82,7 +81,6 @@ export default function NewsPage() {
     setLiveLoading(true);
     setLiveError(false);
     setSelectedLive(null);
-    setAiTranslation(null);
     setCurrentPage(1);
     try {
       const res = await fetch(`/api/news?category=${encodeURIComponent(cat)}`);
@@ -232,7 +230,7 @@ export default function NewsPage() {
             /* 기사 상세 */
             <div>
               <button
-                onClick={() => { setSelectedLive(null); setAiTranslation(null); setShowSummaryKo(false); setSummaryTranslation(null); setTranslateError(null); setTitleTranslation(null); setTitleTranslateError(null); }}
+                onClick={() => { setSelectedLive(null); setShowSummaryKo(false); setSummaryTranslation(null); setTranslateError(null); setTitleTranslation(null); setTitleTranslateError(null); }}
                 className="text-indigo-600 dark:text-indigo-400 hover:underline text-sm mb-4 block"
               >← 목록으로</button>
 
@@ -448,7 +446,7 @@ export default function NewsPage() {
                     {pagedArticles.map((article) => (
                       <button
                         key={article.id}
-                        onClick={() => { setSelectedLive(article); setAiTranslation(null); setShowSummaryKo(false); setSummaryTranslation(null); setTranslateError(null); setTitleTranslation(null); setTitleTranslateError(null); }}
+                        onClick={() => { setSelectedLive(article); setShowSummaryKo(false); setSummaryTranslation(null); setTranslateError(null); setTitleTranslation(null); setTitleTranslateError(null); }}
                         className="bg-white border rounded-xl p-5 text-left hover:shadow-md hover:border-indigo-200 transition-all dark:bg-zinc-800 dark:border-zinc-700 dark:hover:border-indigo-500"
                       >
                         <div className="flex items-center gap-2 mb-2 flex-wrap">

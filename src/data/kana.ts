@@ -137,6 +137,35 @@ export const katakanaData: KanaCharacter[] = [
   { id: "k-wa", character: "ワ", romaji: "wa", type: "katakana", category: "gojuon", row: "wa", orderIndex: 44, strokeCount: 2 },
   { id: "k-wo", character: "ヲ", romaji: "wo", type: "katakana", category: "gojuon", row: "wa", orderIndex: 45, strokeCount: 3 },
   { id: "k-n", character: "ン", romaji: "n", type: "katakana", category: "gojuon", row: "n", orderIndex: 46, strokeCount: 2 },
+
+  // Dakuon (濁音)
+  { id: "k-ga", character: "ガ", romaji: "ga", type: "katakana", category: "dakuon", row: "ga", orderIndex: 47, strokeCount: 4 },
+  { id: "k-gi", character: "ギ", romaji: "gi", type: "katakana", category: "dakuon", row: "ga", orderIndex: 48, strokeCount: 5 },
+  { id: "k-gu", character: "グ", romaji: "gu", type: "katakana", category: "dakuon", row: "ga", orderIndex: 49, strokeCount: 4 },
+  { id: "k-ge", character: "ゲ", romaji: "ge", type: "katakana", category: "dakuon", row: "ga", orderIndex: 50, strokeCount: 5 },
+  { id: "k-go", character: "ゴ", romaji: "go", type: "katakana", category: "dakuon", row: "ga", orderIndex: 51, strokeCount: 4 },
+  { id: "k-za", character: "ザ", romaji: "za", type: "katakana", category: "dakuon", row: "za", orderIndex: 52, strokeCount: 5 },
+  { id: "k-ji", character: "ジ", romaji: "ji", type: "katakana", category: "dakuon", row: "za", orderIndex: 53, strokeCount: 5 },
+  { id: "k-zu", character: "ズ", romaji: "zu", type: "katakana", category: "dakuon", row: "za", orderIndex: 54, strokeCount: 4 },
+  { id: "k-ze", character: "ゼ", romaji: "ze", type: "katakana", category: "dakuon", row: "za", orderIndex: 55, strokeCount: 4 },
+  { id: "k-zo", character: "ゾ", romaji: "zo", type: "katakana", category: "dakuon", row: "za", orderIndex: 56, strokeCount: 4 },
+  { id: "k-da", character: "ダ", romaji: "da", type: "katakana", category: "dakuon", row: "da", orderIndex: 57, strokeCount: 5 },
+  { id: "k-dji", character: "ヂ", romaji: "dji", type: "katakana", category: "dakuon", row: "da", orderIndex: 58, strokeCount: 5 },
+  { id: "k-dzu", character: "ヅ", romaji: "dzu", type: "katakana", category: "dakuon", row: "da", orderIndex: 59, strokeCount: 5 },
+  { id: "k-de", character: "デ", romaji: "de", type: "katakana", category: "dakuon", row: "da", orderIndex: 60, strokeCount: 5 },
+  { id: "k-do", character: "ド", romaji: "do", type: "katakana", category: "dakuon", row: "da", orderIndex: 61, strokeCount: 4 },
+  { id: "k-ba", character: "バ", romaji: "ba", type: "katakana", category: "dakuon", row: "ba", orderIndex: 62, strokeCount: 4 },
+  { id: "k-bi", character: "ビ", romaji: "bi", type: "katakana", category: "dakuon", row: "ba", orderIndex: 63, strokeCount: 4 },
+  { id: "k-bu", character: "ブ", romaji: "bu", type: "katakana", category: "dakuon", row: "ba", orderIndex: 64, strokeCount: 3 },
+  { id: "k-be", character: "ベ", romaji: "be", type: "katakana", category: "dakuon", row: "ba", orderIndex: 65, strokeCount: 3 },
+  { id: "k-bo", character: "ボ", romaji: "bo", type: "katakana", category: "dakuon", row: "ba", orderIndex: 66, strokeCount: 6 },
+
+  // Handakuon (半濁音)
+  { id: "k-pa", character: "パ", romaji: "pa", type: "katakana", category: "handakuon", row: "pa", orderIndex: 67, strokeCount: 3 },
+  { id: "k-pi", character: "ピ", romaji: "pi", type: "katakana", category: "handakuon", row: "pa", orderIndex: 68, strokeCount: 3 },
+  { id: "k-pu", character: "プ", romaji: "pu", type: "katakana", category: "handakuon", row: "pa", orderIndex: 69, strokeCount: 2 },
+  { id: "k-pe", character: "ペ", romaji: "pe", type: "katakana", category: "handakuon", row: "pa", orderIndex: 70, strokeCount: 2 },
+  { id: "k-po", character: "ポ", romaji: "po", type: "katakana", category: "handakuon", row: "pa", orderIndex: 71, strokeCount: 5 },
 ];
 
 export const kanaRows = [

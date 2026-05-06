@@ -26,6 +26,7 @@ const wordsByLevel: Record<string, Word[]> = {
   N4: n4Words,
   N3: n3Words,
   N2: n2Words,
+  N1: n1Words,
 };
 
 function shuffleArray<T>(arr: T[]): T[] {

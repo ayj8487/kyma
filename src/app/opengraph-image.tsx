@@ -195,10 +195,10 @@ export default async function Image() {
         >
           <div style={{ display: "flex", gap: 12 }}>
             {[
-              { label: "1500+ 단어", color: "#fce7f3" },
-              { label: "200+ 문법", color: "#ede9fe" },
+              { label: "JLPT N5~N1", color: "#fce7f3" },
               { label: "AI 회화", color: "#fef3c7" },
               { label: "NHK 뉴스", color: "#dbeafe" },
+              { label: "SRS 복습", color: "#ede9fe" },
             ].map((chip) => (
               <div
                 key={chip.label}

@@ -8,7 +8,6 @@ import {
   Sparkles,
   Bot,
   Keyboard,
-  Newspaper,
 } from "lucide-react";
 import { SeasonalEffects } from "@/components/SeasonalEffects";
 

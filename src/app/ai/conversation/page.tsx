@@ -64,7 +64,7 @@ const topics = [
 function tryParseJSON(text: string): ParsedAIMessage | null {
   try {
     // Remove markdown code block wrappers if present
-    let cleaned = text.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
+    const cleaned = text.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
     const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
     if (!jsonMatch) return null;
     const parsed = JSON.parse(jsonMatch[0]);
@@ -89,7 +89,9 @@ export default function AIConversationPage() {
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   useEffect(() => {
+    // Browser feature detection happens once on mount; setState is intentional.
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSpeechSupported(!!SpeechRecognition);
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
@@ -101,6 +103,7 @@ export default function AIConversationPage() {
         const transcript = Array.from(event.results)
           .map((result) => result[0].transcript)
           .join("");
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setInput(transcript);
       };
 

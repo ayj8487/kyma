@@ -52,11 +52,12 @@ export default function AdminWordsPage() {
   const [formData, setFormData] = useState<WordFormData>(emptyForm);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-  // Load custom words from localStorage
+  // Load custom words from localStorage on mount (intentional setState).
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setCustomWords(JSON.parse(stored));
       }
     } catch {
@@ -97,8 +98,10 @@ export default function AdminWordsPage() {
     currentPage * ITEMS_PER_PAGE
   );
 
-  // Reset page when filters change
+  // Reset page when filters change (intentional setState — synchronizing
+  // pagination with filter state is the entire purpose of this effect).
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
   }, [searchQuery, filterJlpt, filterPos]);
 

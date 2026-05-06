@@ -166,9 +166,10 @@ export default function QuizTypePage({
     [type]
   );
 
-  // Auto-start for kana
+  // Auto-start for kana (mount-time effect; intentional setState).
   useEffect(() => {
     if (type === "kana") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       startQuiz("ALL");
     }
   }, [type, startQuiz]);

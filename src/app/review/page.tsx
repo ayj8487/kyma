@@ -5,13 +5,11 @@ import {
   RotateCcw,
   CheckCircle2,
   XCircle,
-  ChevronRight,
   Trophy,
   AlertTriangle,
   BookOpen,
   Sparkles,
   Eye,
-  EyeOff,
   Volume2,
 } from "lucide-react";
 import { speakJapanese } from "@/lib/tts";
@@ -73,20 +71,32 @@ export default function ReviewPage() {
 
   const {
     progress,
-    getDueItems,
-    getWrongItems,
     updateSRS,
     incrementStudyCount,
   } = useStudyStore();
 
-  const dueItems = useMemo(
-    () => getDueItems().filter((p) => getContentInfo(p.contentType, p.contentId) !== null),
-    [progress]
-  );
+  // Compute review items directly from `progress` so React Compiler can
+  // memoize correctly (avoids referencing unstable store function refs).
+  const dueItems = useMemo(() => {
+    const now = new Date().toISOString();
+    return Object.values(progress).filter(
+      (p) =>
+        p.status === "learning" &&
+        (!p.nextReviewAt || p.nextReviewAt <= now) &&
+        getContentInfo(p.contentType, p.contentId) !== null
+    );
+  }, [progress]);
+
   const wrongItems = useMemo(
-    () => getWrongItems().filter((p) => getContentInfo(p.contentType, p.contentId) !== null),
+    () =>
+      Object.values(progress).filter(
+        (p) =>
+          p.incorrectCount > p.correctCount &&
+          getContentInfo(p.contentType, p.contentId) !== null
+      ),
     [progress]
   );
+
   const allItems = useMemo(() => Object.values(progress), [progress]);
 
   const learningItems = useMemo(
