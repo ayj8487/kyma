@@ -745,7 +745,7 @@ export default function CameraPage() {
                   >
                     <Bookmark size={16} fill={isBookmarked(r.word) ? "currentColor" : "none"} />
                   </button>
-                  <button onClick={() => speakJapanese(r.word)} className="text-indigo-500 hover:text-indigo-700 p-1.5 sm:p-2">
+                  <button aria-label="발음 듣기" onClick={() => speakJapanese(r.word)} className="text-indigo-500 hover:text-indigo-700 p-1.5 sm:p-2">
                     <Volume2 size={16} />
                   </button>
                 </div>

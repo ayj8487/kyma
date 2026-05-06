@@ -299,7 +299,7 @@ export default function ReviewPage() {
                         {contentInfo.display}
                       </p>
                       <button
-                        onClick={() => speakJapanese(contentInfo.speak)}
+                        aria-label="발음 듣기" onClick={() => speakJapanese(contentInfo.speak)}
                         className="mt-3 inline-flex items-center gap-1 text-sm text-accent-indigo hover:text-sakura-500 transition-colors dark:text-warm-400"
                       >
                         <Volume2 size={16} /> 발음 듣기
@@ -474,7 +474,7 @@ export default function ReviewPage() {
                             {contentInfo.display}
                           </p>
                           <button
-                            onClick={() => speakJapanese(contentInfo.speak)}
+                            aria-label="발음 듣기" onClick={() => speakJapanese(contentInfo.speak)}
                             className="mt-3 inline-flex items-center gap-1 text-sm text-accent-indigo hover:text-sakura-500 transition-colors dark:text-warm-400"
                           >
                             <Volume2 size={16} /> 발음 듣기

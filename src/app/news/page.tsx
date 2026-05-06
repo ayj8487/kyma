@@ -273,7 +273,7 @@ export default function NewsPage() {
 
                 {/* 제목 TTS */}
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <button onClick={() => speakJapanese(selectedLive.title)} className="px-3 py-1.5 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 rounded-lg text-sm flex items-center gap-1">
+                  <button aria-label="발음 듣기" onClick={() => speakJapanese(selectedLive.title)} className="px-3 py-1.5 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 rounded-lg text-sm flex items-center gap-1">
                     <Volume2 size={14} /> 제목 듣기
                   </button>
                   <button
@@ -322,7 +322,7 @@ export default function NewsPage() {
                 <div className="bg-gray-50 dark:bg-zinc-900 rounded-xl p-4 mb-4">
                   <div className="flex items-center gap-1.5 mb-2">
                     <span className="text-xs font-medium text-gray-500 dark:text-zinc-400">기사 요약</span>
-                    <button onClick={() => speakJapanese(selectedLive.summary)} className="text-indigo-400 hover:text-indigo-600 ml-auto">
+                    <button aria-label="발음 듣기" onClick={() => speakJapanese(selectedLive.summary)} className="text-indigo-400 hover:text-indigo-600 ml-auto">
                       <Volume2 size={14} />
                     </button>
                   </div>
@@ -376,7 +376,7 @@ export default function NewsPage() {
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {liveVocabulary.map((v, i) => (
                         <div key={i} className="bg-gray-50 dark:bg-zinc-900 rounded-lg p-3 text-sm">
-                          <button onClick={() => speakJapanese(v.word)} className="flex items-center gap-1 text-indigo-600 hover:text-indigo-800 dark:text-indigo-400">
+                          <button aria-label="발음 듣기" onClick={() => speakJapanese(v.word)} className="flex items-center gap-1 text-indigo-600 hover:text-indigo-800 dark:text-indigo-400">
                             <Volume2 size={12} />
                             <span className="font-bold">{v.word}</span>
                             <span className="text-[10px] px-1 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300">{v.level}</span>
@@ -601,7 +601,7 @@ function SavedArticleDetail({ article, showKorean, setShowKorean, onBack }: {
         <h2 className="text-2xl font-bold mb-1 dark:text-zinc-50">{article.title}</h2>
         <p className="text-sm text-gray-400 dark:text-zinc-500 mb-6">{article.titleReading}</p>
         <div className="flex gap-2 mb-4">
-          <button onClick={() => speakJapanese(article.content)} className="px-3 py-1.5 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 rounded-lg text-sm flex items-center gap-1">
+          <button aria-label="발음 듣기" onClick={() => speakJapanese(article.content)} className="px-3 py-1.5 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 rounded-lg text-sm flex items-center gap-1">
             <Volume2 size={14} /> 전체 듣기
           </button>
           <button onClick={() => setShowKorean(!showKorean)} className="px-3 py-1.5 bg-gray-100 text-gray-600 dark:bg-zinc-700 dark:text-zinc-300 rounded-lg text-sm flex items-center gap-1">
@@ -619,7 +619,7 @@ function SavedArticleDetail({ article, showKorean, setShowKorean, onBack }: {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {article.vocabularyList.map((v, i) => (
               <div key={i} className="bg-gray-50 dark:bg-zinc-900 rounded-lg p-3 text-sm">
-                <button onClick={() => speakJapanese(v.word)} className="flex items-center gap-1 text-indigo-600 hover:text-indigo-800 dark:text-indigo-400">
+                <button aria-label="발음 듣기" onClick={() => speakJapanese(v.word)} className="flex items-center gap-1 text-indigo-600 hover:text-indigo-800 dark:text-indigo-400">
                   <Volume2 size={12} /> <span className="font-bold">{v.word}</span>
                 </button>
                 <p className="text-gray-400 dark:text-zinc-500 text-xs">{v.reading}</p>

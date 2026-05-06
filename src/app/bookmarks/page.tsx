@@ -132,7 +132,7 @@ export default function BookmarksPage() {
                   <p className="text-lg font-bold mb-1 dark:text-zinc-100">{q.japanese}</p>
                   <p className="text-xs text-gray-400 dark:text-zinc-500 mb-2">{q.reading}</p>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => speakJapanese(q.japanese)} className="text-indigo-500 hover:text-indigo-700"><Volume2 size={16} /></button>
+                    <button aria-label="발음 듣기" onClick={() => speakJapanese(q.japanese)} className="text-indigo-500 hover:text-indigo-700"><Volume2 size={16} /></button>
                     <button onClick={() => setShowTranslation((p) => ({ ...p, [q.id]: !p[q.id] }))} className="text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300 flex items-center gap-1 text-sm">
                       {showTranslation[q.id] ? <EyeOff size={14} /> : <Eye size={14} />}{showTranslation[q.id] ? "숨기기" : "번역"}
                     </button>
@@ -184,7 +184,7 @@ export default function BookmarksPage() {
             wordBookmarks.map((w) => w && (
               <div key={w.id} className="bg-white dark:bg-zinc-800 border dark:border-zinc-700 rounded-xl p-4 flex items-center justify-between hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-4">
-                  <button onClick={() => speakJapanese(w.reading)} className="text-indigo-500 hover:text-indigo-700"><Volume2 size={18} /></button>
+                  <button aria-label="발음 듣기" onClick={() => speakJapanese(w.reading)} className="text-indigo-500 hover:text-indigo-700"><Volume2 size={18} /></button>
                   <div>
                     <span className="text-xl font-bold dark:text-zinc-100">{w.word}</span>
                     <span className="text-indigo-500 ml-2 text-sm">{w.reading}</span>
@@ -232,7 +232,7 @@ export default function BookmarksPage() {
                       {g.examples.slice(0, 2).map((ex, i) => (
                         <div key={i} className="text-sm">
                           <div className="flex items-center gap-2">
-                            <button onClick={() => speakJapanese(ex.japanese)} className="text-indigo-500 hover:text-indigo-700 flex-shrink-0"><Volume2 size={14} /></button>
+                            <button aria-label="발음 듣기" onClick={() => speakJapanese(ex.japanese)} className="text-indigo-500 hover:text-indigo-700 flex-shrink-0"><Volume2 size={14} /></button>
                             <span className="font-medium dark:text-zinc-200">{ex.japanese}</span>
                           </div>
                           <p className="text-xs text-indigo-500 dark:text-indigo-400 ml-6">{ex.reading}</p>
@@ -268,7 +268,7 @@ export default function BookmarksPage() {
               kanaBookmarks.map((k) => k && (
                 <div key={k.id} className="bg-white dark:bg-zinc-800 border dark:border-zinc-700 rounded-xl p-3 text-center relative group hover:shadow-md transition-shadow">
                   <button onClick={() => toggleBookmark("kana", k.id)} className="absolute top-1 right-1 text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"><X size={12} /></button>
-                  <button onClick={() => speakJapanese(k.character)} className="w-full">
+                  <button aria-label="발음 듣기" onClick={() => speakJapanese(k.character)} className="w-full">
                     <div className="text-2xl font-bold dark:text-zinc-100">{k.character}</div>
                     <div className="text-xs text-gray-400 dark:text-zinc-500">{k.romaji}</div>
                   </button>

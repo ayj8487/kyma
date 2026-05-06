@@ -97,7 +97,7 @@ export default function AnimePage() {
                 <p className="text-xl font-bold mb-1 leading-relaxed dark:text-zinc-100 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" onClick={() => speakJapanese(q.japanese)}>{q.japanese}</p>
                 <p className="text-xs text-gray-400 dark:text-zinc-500 mb-2">{q.reading}</p>
                 <div className="flex items-center gap-2">
-                  <button onClick={() => speakJapanese(q.japanese)} className="text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-300"><Volume2 size={16} /></button>
+                  <button aria-label="발음 듣기" onClick={() => speakJapanese(q.japanese)} className="text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-300"><Volume2 size={16} /></button>
                   <button onClick={() => setShowTranslation((p) => ({ ...p, [q.id]: !p[q.id] }))} className="text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300 flex items-center gap-1 text-sm">{showTrans ? <EyeOff size={14} /> : <Eye size={14} />}{showTrans ? "번역 숨기기" : "번역 보기"}</button>
                   <button onClick={() => setExpandedId(isExpanded ? null : q.id)} className="ml-auto text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300 flex items-center gap-1 text-sm">단어 {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}</button>
                 </div>
